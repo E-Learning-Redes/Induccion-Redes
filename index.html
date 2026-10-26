@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academia Redes Enterprise · Plataforma E-Learning</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    .concept-card { transition: all 0.2s ease; }
+    .concept-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+  <!-- ======================================================================== -->
+  <!-- PANTALLA DE LOGIN Y REGISTRO OBLIGATORIO -->
+  <!-- ======================================================================== -->
+  <div id="authScreen" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-8 text-white">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-blue-600/30">
+            RE
+          </div>
+          <div>
+            <h1 class="font-extrabold text-xl tracking-tight">Redes Enterprise</h1>
+            <p class="text-xs text-slate-400">Plataforma de Inducción & Certificación</p>
+          </div>
+        </div>
+        <span id="cloudStatusBadgeAuth" class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Activo
+        </span>
+      </div>
+
+      <!-- Selector Login / Registro -->
+      <div class="grid grid-cols-2 gap-1 bg-slate-800 p-1 rounded-xl mb-6 border border-slate-700">
+        <button onclick="switchAuthMode('login')" id="authTabLogin" class="py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition">
+          Iniciar Sesión
+        </button>
+        <button onclick="switchAuthMode('register')" id="authTabRegister" class="py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+          Crear Cuenta
+        </button>
+      </div>
+
+      <div id="authErrorBox" class="hidden mb-4 p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs font-medium"></div>
+
+      <!-- FORMULARIO INICIAR SESIÓN -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Correo o Nombre de Usuario</label>
+          <input id="loginId" type="text" required placeholder="ejemplo@empresa.cl o tu usuario" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Contraseña</label>
+          <input id="loginPassword" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <button id="btnLoginSubmit" type="submit" class="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-lg shadow-blue-600/25 transition">
+          Ingresar a la Plataforma
+        </button>
+      </form>
+
+      <!-- FORMULARIO CREAR CUENTA -->
+      <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nombre y Apellido</label>
+          <input id="regFullName" type="text" required placeholder="Ej: Camila Rojas" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nombre de Usuario</label>
+          <input id="regUsername" type="text" required placeholder="Ej: crojas" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Correo Corporativo</label>
+          <input id="regEmail" type="email" required placeholder="nombre@empresa.cl" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Contraseña</label>
+          <input id="regPassword" type="password" required minlength="4" placeholder="Mínimo 4 caracteres" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <button id="btnRegisterSubmit" type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/25 transition">
+          Registrarme y Comenzar
+        </button>
+      </form>
+
+      <div class="mt-6 pt-5 border-t border-slate-800 text-center">
+        <p class="text-[11px] text-slate-500">
+          El progreso de videos vistos y evaluaciones queda sincronizado en tu cuenta personal.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================== -->
+  <!-- BARRA SUPERIOR EJECUTIVA -->
+  <!-- ======================================================================== -->
+  <header class="bg-slate-900 text-white h-16 px-4 md:px-6 flex items-center justify-between border-b border-slate-800 shrink-0 z-20">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-extrabold text-lg shadow-lg shadow-blue-600/30 select-none">
+        RE
+      </div>
+      <div>
+        <h1 class="font-bold text-sm md:text-base tracking-tight flex items-center gap-2">
+          Inducción Redes Enterprise
+          <span class="hidden sm:inline-block text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2.5 py-0.5 rounded-full">De Cero a Consultor</span>
+        </h1>
+        <p class="text-[11px] text-slate-400 hidden sm:block">Programa formativo de 26 módulos · 6 bloques temáticos</p>
+      </div>
+    </div>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN PRINCIPAL -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <nav class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700">
+        <button onclick="switchMainTab('course')" id="tabBtnCourse" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition bg-blue-600 text-white shadow">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Curso</span>
+        </button>
+        <button onclick="switchMainTab('documents')" id="tabBtnDocs" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
+          <i data-lucide="folder-down" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Documentos</span>
+          <span class="bg-blue-500/30 text-blue-200 px-1.5 py-0.2 rounded text-[10px]">4</span>
+        </button>
+        <button onclick="switchMainTab('glossary')" id="tabBtnGlossary" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Glosario</span>
+        </button>
+        <!-- PESTAÑA EXCLUSIVA DE ADMINISTRADOR -->
+        <button onclick="switchMainTab('admin')" id="tabBtnAdmin" class="hidden px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1.5 transition text-amber-300 hover:text-white">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Panel Admin</span>
+        </button>
+      </nav>
+
+      <!-- Barra de progreso del usuario actual -->
+      <div class="hidden xl:flex items-center gap-3 bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-slate-700">
+        <div class="text-xs">
+          <span class="text-slate-400">Avance:</span>
+          <span id="globalProgressText" class="font-bold text-emerald-400 ml-1">0%</span>
+        </div>
+        <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+          <div id="globalProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Perfil del usuario activo y Cerrar Sesión -->
+      <div class="flex items-center gap-2 bg-slate-800/90 pl-3 pr-2 py-1 rounded-xl border border-slate-700">
+        <div class="text-right hidden sm:block">
+          <div id="currentUserNameUI" class="text-xs font-bold text-white leading-none">Usuario</div>
+          <div id="currentUserRoleUI" class="text-[10px] text-slate-400 mt-0.5">Participante</div>
+        </div>
+        <button onclick="handleLogout()" title="Cerrar Sesión" class="p-1.5 rounded-lg bg-slate-700/70 hover:bg-rose-600 text-slate-300 hover:text-white transition">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="flex flex-1 overflow-hidden">
+    
+    <!-- SIDEBAR DE MÓDULOS Y BLOQUES -->
+    <aside id="courseSidebar" class="w-80 bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 shrink-0">
+      <div class="p-4 border-b border-slate-800 bg-slate-950/40">
+        <div class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Progreso Secuencial</div>
+        <div class="text-xs text-slate-400 leading-relaxed">
+          Debes ver el <strong class="text-white">100% del video</strong> de cada módulo para habilitar el siguiente, y aprobar la evaluación del bloque con un <strong class="text-white">80% (8/10)</strong>.
+        </div>
+      </div>
+      <div id="sidebarContainer" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3"></div>
+    </aside>
+
+    <!-- ÁREA DE CONTENIDO CENTRAL -->
+    <main id="mainContent" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50"></main>
+
+  </div>
+
+  <!-- MODAL: MODO ZOOM EDUCATIVO -->
+  <div id="zoomModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 md:p-8 shadow-2xl border border-slate-200 relative">
+      <button onclick="closeZoomModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-3">
+        <i data-lucide="zoom-in" class="w-4 h-4"></i> Vista Detallada · Concepto Clave
+      </div>
+      <h3 id="zoomTermTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4"></h3>
+      
+      <div class="space-y-4">
+        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+          <div class="text-xs font-bold uppercase text-slate-400 mb-1">Definición en Simple</div>
+          <p id="zoomTermDef" class="text-lg text-slate-800 font-medium leading-relaxed"></p>
+        </div>
+
+        <div class="bg-amber-50/90 p-5 rounded-xl border border-amber-200">
+          <div class="text-xs font-bold uppercase text-amber-700 mb-1 flex items-center gap-1.5">
+            <i data-lucide="lightbulb" class="w-4 h-4"></i> Analogía y Ejemplo Práctico
+          </div>
+          <p id="zoomTermAnalogy" class="text-lg text-amber-950 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-between items-center pt-4 border-t border-slate-100">
+        <button onclick="stepZoom(-1)" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm flex items-center gap-1">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i> Anterior
+        </button>
+        <span id="zoomCounter" class="text-xs font-bold text-slate-400"></span>
+        <button onclick="stepZoom(1)" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm flex items-center gap-1">
+          Siguiente <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURACIÓN DE VIDEOS (SOLO ADMIN) -->
+  <div id="adminConfigModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-200">
+      <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white rounded-t-2xl">
+        <div>
+          <h3 class="text-lg font-bold flex items-center gap-2">
+            <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i>
+            Gestión de Enlaces de Video por Módulo
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Por defecto la plataforma carga <code class="text-blue-300">videos/M1.mp4</code> hasta <code class="text-blue-300">videos/M26.mp4</code>. Si alojas algún video en una URL externa, pégala aquí y se sincronizará con todos los usuarios en Supabase.
+          </p>
+        </div>
+        <button onclick="closeAdminConfigModal()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-3 flex-1">
+        <div id="videoLinksContainer" class="space-y-2.5"></div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center rounded-b-2xl">
+        <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Conectado a Supabase: jdwonyunvlqbgpbdisyn
+        </span>
+        <div class="flex gap-2">
+          <button onclick="closeAdminConfigModal()" class="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold">Cancelar</button>
+          <button onclick="saveAdminConfig()" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow">Guardar y Sincronizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================================
+    // CREDENCIALES FIJAS DE SUPABASE (SINCRONIZACIÓN AUTOMÁTICA MULTI-DISPOSITIVO)
+    // ============================================================================
+    const SUPABASE_PROJECT_URL = "https://jdwonyunvlqbgpbdisyn.supabase.co";
+    const SUPABASE_ANON_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impkd29ueXVudmxxYmdwYmRpc3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzk3NTgsImV4cCI6MjEwODYxNTc1OH0.QdXdCxtNKJUCd0iml821YRoazOmL3B2yfQQMgZ0ChRM";
+
+    // Cuenta maestra de Administrador
+    const DEFAULT_ADMIN_ACCOUNT = {
+      username: "admin",
+      email: "admin@redes.cl",
+      password: "Admin2026!",
+      fullName: "Administrador General",
+      role: "admin",
+      createdAt: "2026-10-22",
+      lastLogin: new Date().toLocaleString("es-CL"),
+      watchedVideos: [],
+      unlockedBlocks: [0, 1, 2, 3, 4, 5],
+      blockTestStats: {},
+      personalNotes: {}
+    };
+
+    // Documentos oficiales descargables
+    const COURSE_DOCUMENTS = [
+      {
+        id: "doc-induccion",
+        title: "Manual de Inducción · Redes Enterprise",
+        subtitle: "Guía estructurada de los 26 módulos del programa (De M1 a M26)",
+        category: "Manual Base del Curso",
+        pages: "26 Módulos · 6 Bloques",
+        fileName: "Manual_Induccion_Redes_Enterprise_2026-10-22.docx",
+        filePath: "docs/Manual_Induccion_Redes_Enterprise_2026-10-22.docx",
+        icon: "file-text",
+        color: "blue",
+        description: "Contiene el objetivo, la importancia en el rol, la tabla de conceptos con analogías, el ejemplo integrador y la actividad práctica de 5 minutos de cada uno de los 26 módulos, además del glosario consolidado.",
+        highlights: [
+          "Ruta completa desde Fundamentos (Bloque 0) hasta Delivery y Operación (Bloque 5)",
+          "Caso integrador completo: Distribuidora Andes (M25)",
+          "Glosario consolidado de la A a la Z y pauta de autoevaluación (M26)"
+        ]
+      },
+      {
+        id: "doc-manual-v22",
+        title: "Manual de Redes Enterprise v2.2 · De Cero a Consultor",
+        subtitle: "Libro de referencia técnica y comercial profunda (Partes I a VII + Apéndices)",
+        category: "Referencia Avanzada",
+        pages: "198 páginas · 32 Capítulos",
+        fileName: "Manual-Redes-Enterprise-v2.2.pdf",
+        filePath: "docs/Manual-Redes-Enterprise-v2.2.pdf",
+        icon: "book-marked",
+        color: "indigo",
+        description: "Manual exhaustivo para profundizar en arquitectura LAN/WAN, diseño WiFi, cableado estructurado, seguridad NGFW/SASE, armado de propuestas (BoM, TCO, Payback), diseño por industria vertical y anatomía interna de la red del operador.",
+        highlights: [
+          "Incluye el caso transversal de la Empresa Guía (310 usuarios, 5 sedes)",
+          "Capítulos completos de Propuesta Técnico-Comercial, Operación NOC y Delivery (Gantt 18 semanas)",
+          "Apéndices con Checklist de Discovery, Template de Sizing y Pauta de Autoevaluaciones"
+        ]
+      },
+      {
+        id: "doc-guias-visuales",
+        title: "Guías Visuales de Redes, Fibra Óptica y Telecomunicaciones",
+        subtitle: "Colección ilustrada de 150 láminas técnicas paso a paso",
+        category: "Atlas Ilustrativo",
+        pages: "150 páginas · Láminas 001 a 100+",
+        fileName: "Guias Visuales de Redes, Fibra Optica y Telecomunicaciones.pdf",
+        filePath: "docs/Guias Visuales de Redes, Fibra Optica y Telecomunicaciones.pdf",
+        icon: "image",
+        color: "emerald",
+        description: "Infografías visuales de una página para consultar en segundos: desde cómo funciona una red, direccionamiento IPv4, VLANs y normas T568A/B, hasta empalme por fusión, ODF, splitters, arquitectura GPON/XGS-PON y lectura de trazas OTDR.",
+        highlights: [
+          "Láminas 001 a 050: Redes de datos, OSI/TCP, direccionamiento, switches, PoE y cableado estructurado",
+          "Láminas 051 a 090: Fibra óptica, conectores APC/UPC, fusión, ODF, NAP, splitters y redes PON",
+          "Láminas 091 a 100+: Instrumentos de medición óptica (VFL, OPM, OLS, OTDR y eventos)"
+        ]
+      },
+      {
+        id: "doc-plan-30-dias",
+        title: "Plan de Estudios de 30 Días · Redes y Fibra Óptica",
+        subtitle: "Ruta diaria progresiva con tareas prácticas y checklists de avance",
+        category: "Plan de Estudio Diario",
+        pages: "30 páginas · Día 01 al Día 30",
+        fileName: "Plano de Estudos Telecomunicaciones.pdf",
+        filePath: "docs/Plano de Estudos Telecomunicaciones.pdf",
+        icon: "calendar-check",
+        color: "amber",
+        description: "Programa guiado día por día (30 fichas visuales) diseñado para repasar un tema diario en 10 minutos, identificando errores comunes al estudiar y completando una micro-tarea de verificación antes de avanzar.",
+        highlights: [
+          "Días 01 al 10: Fundamentos de red, IP/DHCP/DNS, equipos básicos y cableado de cobre",
+          "Días 11 al 25: Fibra óptica, monomodo vs multimodo, fusión, ODF, cierres, FTTH, GPON y cajas NAP",
+          "Días 26 al 30: Potencia óptica (dB vs dBm), OPM/OLS/VFL, trazas OTDR, WiFi (2.4/5/6 GHz) y mapa final"
+        ]
+      }
+    ];
+
+    // ============================================================================
+    // BASE DE DATOS DE LOS 6 BLOQUES Y 26 MÓDULOS
+    // ============================================================================
+    const COURSE_BLOCKS = [
+      {
+        id: 0,
+        code: "Bloque 0",
+        title: "Fundamentos",
+        desc: "Base común para todo el equipo: qué es una red, cómo se identifica un equipo dentro de ella y qué hace cada caja.",
+        modules: [
+          {
+            id: "M1",
+            title: "M1. Cómo viaja un dato",
+            duration: "15 min",
+            objective: "Explicar con tus palabras qué es una red, nombrar los 5 elementos de toda comunicación y distinguir una red local (LAN), una red amplia (WAN) e Internet sin perder el hilo.",
+            whyItMatters: "Todo lo que el área comercializa y opera se apoya en estos cinco elementos. Cuando un cliente dice 'se me cayó la red', lo primero es identificar de cuál red está hablando.",
+            prevNext: {
+              intro: "¡Bienvenidos al inicio del Bloque 0: Fundamentos! Comenzamos con el Módulo 1: Cómo viaja un dato.",
+              outro: "En el próximo módulo (Módulo 2) veremos Direccionamiento: IP, DHCP, DNS y Gateway para entender qué pasa cuando un equipo 'no toma IP'."
+            },
+            concepts: [
+              { term: "Red", def: "Conjunto de dispositivos conectados entre sí para compartir información y recursos.", analogy: "Como una red de caminos entre ciudades en Chile: lo importante no es el pavimento, sino que las personas y la carga lleguen bien a su destino." },
+              { term: "Dispositivo y Nodo", def: "Dispositivo es cualquier equipo que envía o recibe datos. Nodo es cualquier punto de conexión dentro de la red.", analogy: "Tu notebook, la impresora del piso, el servidor del sistema contable y el router son todos nodos de la misma red." },
+              { term: "Cliente y Servidor", def: "El cliente es quien pide un servicio o información; el servidor es el equipo que lo entrega.", analogy: "En un restaurante tú eres el cliente, la cocina es el servidor y el garzón que lleva el pedido de ida y vuelta es la red." },
+              { term: "Origen, Mensaje, Medio, Destino y Protocolo", def: "Los cinco elementos de toda comunicación. El protocolo son las reglas que ambos extremos respetan para entenderse.", analogy: "Una carta física tiene remitente (origen), texto (mensaje), cartero (medio), destinatario (destino) y un idioma común (protocolo)." },
+              { term: "LAN (Red de Área Local)", def: "Red puertas adentro de un edificio, piso o campus, administrada por la propia empresa.", analogy: "Todo lo que está conectado del router hacia adentro de tu oficina, incluyendo los cables del piso y el WiFi." },
+              { term: "WAN (Red de Área Amplia)", def: "Red que une sucursales distantes entre ciudades sobre la infraestructura de un operador de telecomunicaciones.", analogy: "La carretera privada interurbana que conecta la casa matriz en Santiago con la bodega en Antofagasta y la sucursal en Concepción." },
+              { term: "Internet", def: "La gran red pública mundial de redes conectadas entre sí. No es lo mismo que la LAN ni que una WAN privada.", analogy: "La LAN es el interior de tu casa, el router es la puerta de calle e Internet es la avenida pública donde transita todo el mundo." }
+            ],
+            integratorExample: "Un ejecutivo envía un correo desde su notebook (origen). El mensaje viaja por el WiFi de la oficina hasta el switch del piso y llega al router (ahí termina la LAN). Luego sale por el enlace del operador (WAN) hacia Internet hasta llegar al servidor de correo del destinatario (destino), respetando siempre el mismo protocolo.",
+            activity: "Dibuja la ruta de un correo desde tu notebook hasta el servidor de destino, nombrando 5 elementos y marcando con una línea dónde termina la LAN de la oficina y dónde empieza la red externa del operador."
+          },
+          {
+            id: "M2",
+            title: "M2. Direccionamiento: IP, DHCP, DNS y gateway",
+            duration: "15 min",
+            objective: "Leer la configuración de red de un computador (IP, máscara, gateway y DNS), interpretar las frases típicas de soporte ('no toma IP', 'problema de DNS', 'cayó el gateway') y distinguir IP privada, IP pública y NAT.",
+            whyItMatters: "Estas palabras aparecen en la mitad de los tickets de soporte. Entenderlas permite saber de inmediato si la falla está adentro de la oficina del cliente, en el enlace o en Internet.",
+            prevNext: {
+              intro: "Módulo 2: Direccionamiento: IP, DHCP, DNS y gateway (Bloque 0: Fundamentos).",
+              outro: "En el próximo módulo (Módulo 3) veremos los Modelos TCP/IP y OSI para entender qué significa un problema de 'capa 2' o 'capa 3'."
+            },
+            concepts: [
+              { term: "Dirección IP", def: "Identificador numérico único que recibe cada equipo dentro de una red para poder enviar y recibir paquetes.", analogy: "Es la dirección exacta de una casa (calle y número). Sin ella, el cartero no sabe dónde dejar la encomienda." },
+              { term: "IPv4 e IPv6", def: "Dos formatos de dirección IP. IPv4 (ej. 192.168.1.10) tiene un límite de combinaciones que ya se agotó en el mundo. IPv6 es el formato nuevo casi ilimitado.", analogy: "IPv4 es como numerar patentes con solo 4 dígitos: se acabaron. IPv6 agrega muchas más letras y números para que nunca falten." },
+              { term: "IP Privada", def: "Dirección usada solo dentro de la LAN de la oficina; no es visible desde Internet. Rangos: 192.168.x.x, 10.x.x.x y 172.16.x.x a 172.31.x.x.", analogy: "Es el número de oficina o anexo dentro de un edificio corporativo: sirve adentro, pero el correo de la calle no lo conoce." },
+              { term: "IP Pública", def: "Dirección única visible en todo Internet, entregada por el operador de telecomunicaciones.", analogy: "Es la dirección oficial de la calle del edificio. Es la única cara visible desde el exterior." },
+              { term: "Gateway (Puerta de Enlace)", def: "Es la salida de la red local (LAN) hacia otras redes o hacia Internet. Normalmente es la dirección IP del router.", analogy: "Es el torniquete o conserjería de salida del edificio. Si se cae el gateway, puedes hablar con los de tu piso, pero nadie sale a la calle." },
+              { term: "DHCP", def: "Servicio automático que entrega IP, máscara, gateway y DNS a cada computador o celular apenas se conecta a la red.", analogy: "Es el recepcionista de un evento que te asigna mesa apenas entras. Decir 'el equipo no toma IP' significa que el recepcionista DHCP no respondió." },
+              { term: "DNS", def: "Directorio que traduce nombres fáciles de recordar (como empresa.cl) a su dirección IP numérica real.", analogy: "Es la agenda de contactos de tu celular: tú buscas el nombre de la persona, pero el teléfono marca el número por detrás." },
+              { term: "NAT y CGNAT", def: "NAT traduce muchas IPs privadas internas para que salgan a Internet compartiendo una sola IP pública. CGNAT hace lo mismo a escala masiva en el operador, impidiendo conexiones entrantes directas.", analogy: "Como la central telefónica de una empresa: 200 anexos internos llaman hacia afuera mostrando un único número principal." }
+            ],
+            integratorExample: "Un notebook se conecta al WiFi de la sucursal. El servidor DHCP le asigna la IP privada 192.168.10.45 y el gateway 192.168.10.1. El usuario escribe el nombre de una web; el DNS lo traduce a IP pública, el paquete sale por el gateway y el NAT lo saca a Internet con la IP pública de la empresa.",
+            activity: "Ejecuta ipconfig en tu computador para identificar tu IP privada, tu puerta de enlace (gateway) y tu DNS. Si el DNS se cae, ¿puedes seguir entrando a un servidor escribiendo su número IP directo? Sí, porque la línea funciona, solo falló la agenda que traduce el nombre."
+          },
+          {
+            id: "M3",
+            title: "M3. Modelos TCP/IP y OSI",
+            duration: "15 min",
+            objective: "Relacionar el modelo práctico TCP/IP (4 capas) con el modelo OSI (7 capas) y ubicar dónde viven el cable, el switch, la MAC, el router, la IP, el puerto 443 y las aplicaciones.",
+            whyItMatters: "Toda la jerga de los ingenieros ('es un problema de capa 2', 'está bloqueado en capa 4') se basa en estos pisos. Dominarlos te permite saber qué falló y a quién escalarlo.",
+            prevNext: {
+              intro: "Módulo 3: Modelos TCP/IP y OSI (Bloque 0: Fundamentos).",
+              outro: "En el próximo módulo (Módulo 4) cerraremos el Bloque 0 viendo los Equipos básicos: switch, router, access point y firewall."
+            },
+            concepts: [
+              { term: "Modelo de Capas", def: "Divide la comunicación en pisos ordenados de abajo hacia arriba. Cada piso hace su tarea y confía en el piso inferior.", analogy: "Como una empresa de encomiendas: uno embala la caja, otro le pega la etiqueta, otro maneja el camión y otro la entrega en recepción." },
+              { term: "Modelo TCP/IP (4 Capas)", def: "Divide la red en: 1) Enlace (cables, WiFi, switches), 2) Internet (IP, routers), 3) Transporte (TCP/UDP, puertos) y 4) Aplicación (web, correo, DNS).", analogy: "Regla rápida: cable cortado = Enlace; sin ruta = Internet; puerto bloqueado = Transporte; página con error = Aplicación." },
+              { term: "Modelo OSI (7 Capas)", def: "Piso 1: Física, Piso 2: Enlace, Piso 3: Red, Piso 4: Transporte, Piso 5: Sesión, Piso 6: Presentación y Piso 7: Aplicación.", analogy: "De aquí nace la jerga diaria: 'Capa 1' es cable o fibra; 'Capa 2' es switch y VLAN; 'Capa 3' es router e IP; 'Capa 7' es la aplicación." },
+              { term: "Trama y Paquete", def: "La Trama es el sobre de Capa 2 que se mueve dentro del piso usando direcciones MAC. El Paquete es el sobre de Capa 3 que viaja entre redes usando direcciones IP.", analogy: "El paquete es la encomienda con la dirección final del cliente; la trama es la bandeja del camión que la transporta en este tramo." },
+              { term: "Dirección MAC", def: "Identificador físico único grabado de fábrica en la tarjeta de red de cada equipo. Se usa en la Capa 2 dentro de la LAN.", analogy: "Es el RUT del computador: nace con él de fábrica y nunca cambia. La dirección IP, en cambio, cambia si te mudas de oficina." },
+              { term: "TCP vs UDP", def: "Los dos modos de transporte en Capa 4. TCP confirma cada entrega y reenvía si algo se pierde (web, correo, bancos). UDP envía rápido sin pedir confirmación (voz y videollamadas).", analogy: "TCP es mandar una carta certificada con firma; UDP es hablar por megáfono en vivo donde prefieres velocidad sin retrasos." },
+              { term: "Puerto (443, 80, 53)", def: "Número en Capa 4 que identifica a qué aplicación exacta va dirigido el paquete dentro de un servidor (443 = HTTPS web segura, 80 = HTTP, 53 = DNS).", analogy: "Si la dirección IP es el número del edificio, el Puerto es el número de oficina o anexo específico con el que quieres hablar." }
+            ],
+            integratorExample: "Un usuario reclama que no le abre el sistema contable en la nube. Soporte revisa piso por piso de abajo hacia arriba: el cable y el WiFi están bien (Capa 1 y 2), el PC tiene IP y llega al router (Capa 3), pero descubre que el puerto 443 está bloqueado en el firewall (Capa 4). No era caída de red, era un permiso de seguridad.",
+            activity: "Ubica mentalmente en su capa: cable UTP (Capa 1), Switch y MAC (Capa 2), Router e IP (Capa 3), Puerto 443 y TCP/UDP (Capa 4), Navegador HTTPS y DNS (Capa 7)."
+          },
+          {
+            id: "M4",
+            title: "M4. Equipos básicos: switch, router, access point y firewall",
+            duration: "15 min",
+            objective: "Distinguir de inmediato qué hace y qué no hace un switch, un router, un access point (AP), una ONT y un firewall al verlos en el diagrama de una sede o en una propuesta.",
+            whyItMatters: "Son las cajas que van en toda cotización y plano técnico. Entender por qué en una empresa van separadas (y no todo-en-uno como en la casa) es clave frente al cliente.",
+            prevNext: {
+              intro: "Módulo 4: Equipos básicos de red, el último módulo del Bloque 0: Fundamentos.",
+              outro: "¡Fin del Bloque 0! Rinde la evaluación del bloque (80% para aprobar) y desbloquea el Bloque 1: LAN y WiFi Enterprise."
+            },
+            concepts: [
+              { term: "Switch (Conmutador)", def: "Equipo de Capa 2 lleno de puertos que conecta por cable a los computadores, impresoras y APs dentro de la misma oficina (LAN). No da salida a Internet por sí solo.", analogy: "Es la central de anexos interna de la oficina: permite que todos los del piso conversen entre sí rapidísimo, pero no tiene línea a la calle." },
+              { term: "Router (Enrutador)", def: "Equipo de Capa 3 que conecta redes distintas (une la LAN con la WAN o Internet) y decide la mejor ruta para cada paquete. Es el gateway de la oficina.", analogy: "Es la aduana o despacho en la frontera del edificio: mira la dirección de destino y decide por qué carretera mandar el paquete." },
+              { term: "Access Point (AP)", def: "Punto de acceso que se instala en el cielo de la oficina conectado por cable al switch para dar señal WiFi a notebooks y celulares.", analogy: "Es una extensión inalámbrica del switch (uno cada 20 o 30 personas). Si se apaga el switch que le da cable, el AP deja de dar red." },
+              { term: "Módem u ONT", def: "Equipo terminal del operador que recibe el cable de la calle (fibra óptica, cobre o radio) y transforma esa luz o señal en un cable de red Ethernet para el cliente.", analogy: "Es el adaptador de enchufe cuando viajas a otro país: traduce la señal física de la calle para que tus equipos internos la entiendan." },
+              { term: "Firewall (Cortafuegos)", def: "Equipo de seguridad que se ubica en la entrada de la red y controla qué tráfico tiene permiso para entrar o salir según reglas estrictas.", analogy: "Es el guardia de conserjería con lista de invitados: revisa quién entra, quién sale y bloquea accesos no autorizados." },
+              { term: "Equipo Integrado vs Dedicado", def: "En una casa, una sola cajita plástica hace de ONT, router, firewall, switch de 4 puertos y AP WiFi. En una empresa, cada función va en un equipo dedicado separado.", analogy: "En una sede de 300 personas necesitas especialistas dedicados por rendimiento y continuidad, no un aparato casero todo-en-uno." }
+            ],
+            integratorExample: "En el plano de una sucursal el enlace de fibra entra desde la calle a la ONT, pasa al Firewall que filtra amenazas, sigue al Router que encamina las rutas, baja al Switch de 48 puertos del piso y desde el Switch salen cables hacia los computadores y hacia los 6 Access Points en el techo.",
+            activity: "Verifica la fila india en cualquier plano corporativo: Calle -> ONT -> Firewall -> Router -> Switch -> Access Point / Computadores."
+          }
+        ]
+      },
+      {
+        id: 1,
+        code: "Bloque 1",
+        title: "LAN y WiFi Enterprise",
+        desc: "Cómo está armada por dentro la red local de una empresa, cómo se segmenta por seguridad y de qué está hecha físicamente (cobre, fibra óptica y WiFi).",
+        modules: [
+          {
+            id: "M5",
+            title: "M5. Arquitectura LAN jerárquica",
+            duration: "15 min",
+            objective: "Identificar las capas Core, Distribución y Acceso en un plano de red, entender por qué una sede mediana usa Collapsed Core y reconocer mecanismos de redundancia como STP, Stacking y MC-LAG.",
+            whyItMatters: "Las propuestas de red interna se arman por niveles. Entender esta jerarquía te permite explicar por qué una cotización lleva cierta cantidad de switches y cómo se evitan caídas.",
+            prevNext: {
+              intro: "¡Bienvenidos al inicio del Bloque 1: LAN y WiFi Enterprise! Abrimos este bloque con el Módulo 5: Arquitectura LAN jerárquica.",
+              outro: "En el próximo módulo (Módulo 6) veremos Segmentación: cómo usar VLAN, SGT y defensa en profundidad para separar redes dentro del edificio."
+            },
+            concepts: [
+              { term: "Diseño Jerárquico de 3 Capas", def: "Ordena los switches de un campus grande en tres niveles: Acceso (donde se enchufan usuarios y APs), Distribución (agrupa pisos y aplica reglas) y Core (el núcleo central de altísima velocidad).", analogy: "Igual que el diseño urbano: calles de barrio (Acceso), avenidas principales (Distribución) y la autopista central (Core)." },
+              { term: "Collapsed Core (Núcleo Colapsado - 2 Capas)", def: "Diseño donde las funciones de Core y Distribución se juntan en un mismo par de switches centrales. Es el estándar en edificios medianos.", analogy: "Un edificio de 5 pisos con 300 usuarios no necesita 3 niveles separados; junta avenida y autopista en un diseño práctico de 2 capas." },
+              { term: "Redundancia en LAN", def: "Instalar doble equipo y doble cable de subida para que la falla de un switch o el corte de un cable no deje a un piso sin red.", analogy: "Tener dos ascensores en el edificio: si uno entra en mantención, la gente sigue subiendo por el otro." },
+              { term: "Spanning Tree (STP y RSTP)", def: "Protocolo que evita que los datos giren en círculo infinito (loop) cuando hay dos cables entre switches: deja un cable trabajando y bloquea el segundo en espera.", analogy: "Como una rotonda con una salida cerrada con conos: evita choques, pero desperdicias una pista que solo se abre si la primera se corta." },
+              { term: "Stacking y Enlaces Activo/Activo (MC-LAG)", def: "Técnicas que unen dos switches físicos para que actúen como un solo cerebro lógico, permitiendo usar todos los cables al mismo tiempo sin bloquear ninguno.", analogy: "Dos pistas de autopista abiertas simultáneamente a máxima capacidad; si una se cierra, el tráfico sigue por la otra sin corte." },
+              { term: "Uplink (Enlace de Subida)", def: "El puerto o cable de mayor velocidad que conecta un switch de un nivel inferior con el nivel superior.", analogy: "Los 48 puertos de 1 Gbps donde se conectan los escritorios suben hacia el switch central por dos tuberías grandes (uplinks) de 10 Gbps." }
+            ],
+            integratorExample: "Una propuesta para una clínica de un edificio contempla dos switches centrales en alta disponibilidad activo/activo (Collapsed Core) y switches de acceso apilados (stack) en cada piso con doble uplink de 10 Gbps: ningún equipo ni cable único puede botar la clínica.",
+            activity: "Al mirar el diagrama de una sede, distingue si tiene 3 niveles de switches (Campus grande) o 2 niveles (Collapsed Core) y verifica si los switches de piso suben con un solo cable o con doble enlace redundante."
+          },
+          {
+            id: "M6",
+            title: "M6. Segmentación: VLAN, SGT y defensa en profundidad",
+            duration: "15 min",
+            objective: "Explicar para qué sirve una VLAN, por qué es obligatorio separar invitados, cámaras y máquinas industriales, y distinguir Puerto de Acceso, Trunk 802.1Q, SGT, DMZ y Red OT.",
+            whyItMatters: "Poner a todos los equipos en la misma bolsa es un riesgo crítico. Segmentar la red es la primera exigencia de ciberseguridad y normativa en cualquier empresa.",
+            prevNext: {
+              intro: "Módulo 6: Segmentación: VLAN, SGT y defensa en profundidad (Bloque 1: LAN y WiFi Enterprise).",
+              outro: "En el próximo módulo (Módulo 7a) entraremos al mundo físico con el Cableado de cobre y cableado estructurado."
+            },
+            concepts: [
+              { term: "VLAN (Red Local Virtual)", def: "Partición lógica que divide un mismo switch físico en varias redes independientes. Los equipos de distintas VLANs no se ven entre sí a menos que un firewall lo autorice.", analogy: "Un edificio donde cada piso es un mundo aparte sin escaleras internas: para ir del piso de Visitas al de Finanzas debes bajar a conserjería a pedir permiso." },
+              { term: "Etiquetado 802.1Q y Puerto Trunk", def: "Un puerto Trunk es el cable que transporta el tráfico de muchas VLANs juntas entre dos switches. El estándar 802.1Q le pega una etiqueta a cada trama para saber a qué VLAN pertenece.", analogy: "La cinta transportadora del aeropuerto que lleva maletas de distintos vuelos juntas, pero cada una con su etiqueta de color para no mezclarlas al llegar." },
+              { term: "Puerto de Acceso", def: "Puerto del switch asignado a una única VLAN, donde se conecta directamente el computador de un usuario o una impresora.", analogy: "El enchufe de red en la pared de tu puesto de trabajo, que pertenece exclusivamente a la VLAN de Empleados." },
+              { term: "SGT (Etiqueta de Grupo de Seguridad)", def: "Método moderno que asigna permisos según quién es la persona o el equipo, sin importar en qué enchufe o piso se conecte.", analogy: "Como una credencial corporativa con chip: te abre las mismas puertas autorizadas para tu cargo en cualquier sucursal del país." },
+              { term: "DMZ (Zona Desmilitarizada)", def: "Red aislada donde se colocan los servidores que deben ser visitados desde Internet (como la web pública), separados de la red interna.", analogy: "La sala de reuniones al lado de la recepción: ahí atiendes a los proveedores externos sin dejarlos pasear por los pasillos internos." },
+              { term: "Red OT (Tecnología Operacional)", def: "La red donde se conectan máquinas industriales, sensores, robots, hornos o equipos médicos. Se aísla estrictamente de la red de oficinas (IT).", analogy: "En una planta minera o clínica, un virus en el computador de un administrativo jamás debe cruzar a la red que controla los camiones o los escáneres médicos." },
+              { term: "Defensa en Profundidad", def: "Estrategia de poner múltiples anillos de seguridad sucesivos para que, si un atacante supera uno, el siguiente lo detenga.", analogy: "Proteger un castillo con foso, puente levadizo, muralla externa y guardias en cada torre, en vez de confiar en una sola llave en la entrada." }
+            ],
+            integratorExample: "En un hospital existen 4 VLANs separadas: Administración, Equipos Médicos (OT), Cámaras de Seguridad y WiFi de Pacientes/Visitas. Aunque un visitante esté sentado al lado del resonador magnético, su celular va por un carril virtual totalmente aislado.",
+            activity: "Diseña 4 VLANs para una clínica o planta industrial y explica en simple por qué jamás deben compartir la misma red plana las visitas con las máquinas críticas."
+          },
+          {
+            id: "M7a",
+            title: "M7a. Cableado de cobre y cableado estructurado",
+            duration: "15 min",
+            objective: "Reconocer un cable UTP y sus categorías (Cat5e, Cat6, Cat6A), recordar el límite físico de 100 metros, nombrar cada pieza del recorrido desde el rack al escritorio y entender qué son PoE y la Certificación.",
+            whyItMatters: "El cableado físico suele ser la principal causa de atrasos o costos extra en las implementaciones si se asume que el cliente lo tiene en buen estado y no es así.",
+            prevNext: {
+              intro: "Módulo 7a: Cableado de cobre y cableado estructurado (Bloque 1: LAN y WiFi Enterprise).",
+              outro: "En el próximo módulo (Módulo 7b) veremos qué pasa cuando superamos los 100 metros o salimos a la calle: Fibra óptica, FTTH/GPON y planta externa."
+            },
+            concepts: [
+              { term: "Cable UTP y Par Trenzado", def: "Cable de red formado por 4 pares de hilos de cobre trenzados entre sí para anular las interferencias eléctricas.", analogy: "Dos personas caminando abrazadas se protegen del viento; los hilos trenzados se protegen mutuamente del ruido eléctrico." },
+              { term: "Categorías Cat5e, Cat6 y Cat6A", def: "Cat5e (1 Gbps, 100 MHz, obsoleto para obras nuevas), Cat6 (1 Gbps, 250 MHz) y Cat6A (10 Gbps, 500 MHz, el estándar actual para oficinas nuevas y WiFi 6E/7).", analogy: "Instalar Cat5e hoy es poner cañerías angostas que habrá que picar y cambiar; todo proyecto nuevo debe ir en Cat6 o Cat6A." },
+              { term: "Límite de 100 Metros", def: "Distancia máxima total permitida para cualquier enlace de cable de cobre (incluyendo los cables cortos de las puntas). Más allá de 100 metros la señal se pierde.", analogy: "Si tienes que unir dos racks en una bodega de 180 metros de largo, el cobre no sirve: es obligatorio pasar a fibra óptica." },
+              { term: "Cableado Horizontal, Patch Panel y Keystone", def: "El Cableado Horizontal va fijo por muros y cielos desde el Patch Panel (el panel numerado en el rack) hasta el Keystone (el enchufe hembra en la pared del usuario).", analogy: "Es como la cañería empotrada de la casa: nace en el tablero central (Patch Panel) y termina en la llave del muro (Keystone)." },
+              { term: "Patch Cord, Conector RJ45 y Norma T568B", def: "El Patch Cord es el cable corto flexible con enchufes machos RJ45 en las puntas que une la pared con el PC o el Patch Panel con el Switch. T568A/B es el orden de los 8 colores internos.", analogy: "Es el alargador visible que el usuario enchufa. En Chile el estándar habitual es armar ambas puntas con el código de colores T568B." },
+              { term: "Certificación de Cableado", def: "Prueba en terreno con un instrumento especializado que mide cada punto de red instalado y emite un informe oficial aprobando que cumple la norma.", analogy: "Es la recepción final de la instalación eléctrica: si el punto 37 'no certifica', hay que repararlo antes de entregar la obra." },
+              { term: "PoE (Power over Ethernet)", def: "Tecnología donde el switch envía corriente eléctrica junto con los datos por el mismo cable UTP para encender Access Points, cámaras y teléfonos IP.", analogy: "Permite colgar un AP WiFi en el techo o una cámara en un pilar con un solo cable de red, sin tener que pagarle a un electricista por un enchufe de 220V." }
+            ],
+            integratorExample: "El recorrido físico completo dentro de la oficina es: Switch -> Patch Cord -> Patch Panel -> Cableado Horizontal por el techo -> Toma de pared (Keystone) -> Patch Cord -> Computador (todo en menos de 100 metros y certificado).",
+            activity: "Si un cliente pide conectar a 10 Gbps dos salas separadas por 150 metros dentro de su planta, ¿puedes cotizar cable UTP Cat6A? No, porque supera el límite físico de 100 metros del cobre; requiere fibra óptica."
+          },
+          {
+            id: "M7b",
+            title: "M7b. Fibra óptica, FTTH/GPON y planta externa",
+            duration: "15 min",
+            objective: "Explicar cómo viaja la luz por la fibra, distinguir Monomodo de Multimodo, reconocer la ruta GPON desde la central al cliente (OLT, ODF, Feeder, Splitter, NAP, Drop, ONT) e interpretar mediciones en dB, dBm y OTDR.",
+            whyItMatters: "La fibra óptica es la columna vertebral de las telecomunicaciones. Aunque no vayas a fusionar cables en un poste, leerás tickets que hablan de atenuación en dBm, splitters o cortes medidos con OTDR.",
+            prevNext: {
+              intro: "Módulo 7b: Fibra óptica, FTTH/GPON y planta externa (Bloque 1: LAN y WiFi Enterprise).",
+              outro: "En el próximo módulo (Módulo 8) veremos cómo diseñar y asegurar redes inalámbricas corporativas en WiFi Enterprise."
+            },
+            concepts: [
+              { term: "Fibra Óptica (Núcleo y Revestimiento)", def: "Hilo finísimo de vidrio donde los datos viajan como pulsos de luz. El Núcleo (core) guía la luz y el Revestimiento (cladding) la refleja hacia adentro para que no escape.", analogy: "Como una linterna prendiéndose millones de veces por segundo dentro de un tubo espejado inmune a interferencias eléctricas." },
+              { term: "Monomodo (SM) vs Multimodo (MM)", def: "Monomodo (chaqueta amarilla) lleva un solo haz de luz por decenas de kilómetros (usada en la calle por los operadores). Multimodo (naranja o aqua) lleva varios rebotes cortos hasta 550m o 2km (dentro de edificios y data centers).", analogy: "Amarillo (Monomodo) = carretera interurbana de larga distancia; Naranja/Aqua (Multimodo) = pasillos internos entre racks del edificio." },
+              { term: "Conectores (SC, LC) y Pulidos (APC verde vs UPC azul)", def: "SC (cuadrado grande típico en ONT) y LC (pequeño para switches). El pulido APC (conector verde en ángulo de 8°) no refleja luz hacia atrás; el UPC (azul) es plano.", analogy: "Regla de oro física: verde se enchufa solo con verde, y azul solo con azul. Mezclarlos daña la punta del cristal y mata la señal." },
+              { term: "Empalme por Fusión, Pigtail, ODF y Cierre de Empalme", def: "Fusionar es soldar dos hilos de vidrio con arco eléctrico. En el rack terminan en el ODF (bandeja óptica con pigtails) y en los postes de la calle se protegen dentro de Cierres de Empalme (cajas negras selladas).", analogy: "El ODF es el Patch Panel pero para fibra; el Cierre de Empalme es el tambor negro hermético que ves colgando en los postes de la vereda." },
+              { term: "Ruta FTTH / GPON (OLT -> Feeder -> Splitter -> NAP -> Drop -> ONT)", def: "En la central nace la luz en la OLT, sale por el cable troncal (Feeder), un cristal pasivo (Splitter 1:32 o 1:64) divide la luz hacia las cajas de poste (NAP), y de ahí baja el cable acometida (Drop) hasta la ONT del cliente.", analogy: "Como una matriz de agua potable que se reparte entre 32 o 64 vecinos: por eso GPON se llama 'fibra compartida'." },
+              { term: "dB, dBm y Herramientas (OPM, VFL y OTDR)", def: "dBm mide la potencia de luz que llega (ej. -18 dBm es sano; -31 dBm está caído). dB mide cuánta luz se perdió en el viaje. El OPM mide potencia, el VFL es un láser rojo y el OTDR es el radar que indica a cuántos kilómetros exactos se cortó la fibra.", analogy: "Cuando planta externa escribe en el ticket 'OTDR marca corte a 3,28 km', ya saben a qué poste exacto mandar la camioneta." }
+            ],
+            integratorExample: "Un local comercial tiene su ONT con luz roja de alarma (LOS). El técnico mide con el OPM y ve que llegan -32 dBm (casi sin luz). Conecta el OTDR y detecta un corte físico a 1,2 km en el tramo de distribución tras el paso de un camión alto; abre el cierre de empalme, fusiona la fibra y la potencia vuelve a -18 dBm.",
+            activity: "Ordena mentalmente el viaje de la luz desde la central del operador hasta el cliente: OLT -> ODF -> Cable Feeder -> Splitter -> Caja NAP en el poste -> Cable Drop -> ONT."
+          },
+          {
+            id: "M8",
+            title: "M8. WiFi enterprise",
+            duration: "15 min",
+            objective: "Diferenciar un diseño WiFi por Cobertura versus por Capacidad, distinguir las bandas 2.4, 5 y 6 GHz (WiFi 6, 6E y 7), leer un mapa de calor (Site Survey con RSSI) y explicar la seguridad WPA3 con 802.1X.",
+            whyItMatters: "El WiFi es la cara visible de la red para todos los usuarios y lo que más reclamos genera cuando se diseña como si fuera una casa.",
+            prevNext: {
+              intro: "Módulo 8: WiFi Enterprise (Bloque 1: LAN y WiFi Enterprise).",
+              outro: "En el próximo módulo (Módulo 9) cerraremos el Bloque 1 viendo Oversubscription y gestión de capacidad: cuándo un enlace llega al 70% u 80%."
+            },
+            concepts: [
+              { term: "Bandas de 2,4 GHz, 5 GHz y 6 GHz", def: "2,4 GHz llega lejos pero es lenta y saturada de ruido. 5 GHz es rápida y de alcance medio. 6 GHz es la nueva autopista exclusiva y limpia habilitada para WiFi 6E y WiFi 7.", analogy: "2,4 GHz es como escuchar radio AM (llega al campo pero con interferencia); 6 GHz es una autopista nueva de 8 pistas recién inaugurada." },
+              { term: "Estándares WiFi 6, WiFi 6E y WiFi 7", def: "Generaciones actuales del WiFi. WiFi 6 maneja mejor muchos equipos a la vez; WiFi 6E abre la banda de 6 GHz; WiFi 7 multiplica la velocidad y baja la latencia.", analogy: "Todo proyecto corporativo nuevo hoy se diseña desde WiFi 6E hacia arriba; cotizar WiFi 5 hoy es vender tecnología obsoleta." },
+              { term: "Diseño por Cobertura vs por Capacidad", def: "Cobertura es lograr que la señal llegue a todos los rincones (ej. una bodega). Capacidad es soportar a cientos de dispositivos transmitiendo al mismo tiempo (ej. oficinas densas o salas de reuniones).", analogy: "Un parlante fuerte se escucha en todo un gimnasio (cobertura), pero si 200 personas quieren hablarle al mismo micrófono nadie se entiende (capacidad). Subir la potencia no da más capacidad; se necesitan más APs." },
+              { term: "Site Survey, RSSI e Interferencia", def: "El Site Survey es el estudio con planos de calor (verde/amarillo/rojo) que define cuántos APs instalar y dónde. Mide el RSSI (potencia recibida en dBm: -65 dBm es óptimo para voz/video; -80 dBm es malo).", analogy: "Es la radiografía antes de operar: evita adivinar a ojo cuántos APs necesita un piso." },
+              { term: "SSID, WPA3 y Autenticación 802.1X", def: "El SSID es el nombre de la red WiFi. WPA3 es el cifrado moderno y 802.1X valida a cada trabajador con su usuario y contraseña personal contra un servidor (RADIUS), sin usar una clave única anotada en un papel.", analogy: "La clave WiFi compartida es como dejar la llave debajo del felpudo; 802.1X es entrar con tu credencial personal que se desactiva el día que dejas la empresa." },
+              { term: "Gestión Cloud vs On-Premise", def: "Define dónde vive el cerebro (controladora) que administra todos los APs: en la nube para gestionar 50 sucursales desde un panel web, o en un servidor físico dentro del cliente por exigencia interna.", analogy: "Administrar todas las tiendas desde una consola central en internet (Cloud) vs tener el panel de control encerrado en la bóveda del banco (On-premise)." }
+            ],
+            integratorExample: "Una oficina con 120 trabajadores reclama que las videollamadas se cortan aunque el ícono del WiFi marca 'todas las rayitas llenas'. El Site Survey revela que hay solo 3 APs para 200 dispositivos: sobra cobertura pero colapsó la capacidad. Se corrige agregando APs en WiFi 6E.",
+            activity: "¿Por qué subir al máximo la potencia de transmisión de un AP no resuelve la lentitud en una sala con 80 personas? Porque el problema no es alcance de señal (cobertura), sino saturación de turnos para hablar (capacidad)."
+          },
+          {
+            id: "M9",
+            title: "M9. Oversubscription y gestión de capacidad",
+            duration: "15 min",
+            objective: "Explicar por qué la sobresuscripción es normal en toda red, conocer sus rangos sanos e identificar por qué el umbral del 70% de utilización en hora punta gatilla una venta de ampliación antes del colapso al 80%.",
+            whyItMatters: "Mirar el reporte de utilización de enlaces es la forma más limpia y consultiva de detectar oportunidades de upgrade antes de que el cliente llame enojado por lentitud.",
+            prevNext: {
+              intro: "Módulo 9: Oversubscription y gestión de capacidad, último módulo del Bloque 1: LAN y WiFi Enterprise.",
+              outro: "¡Terminaste el Bloque 1! Aprueba la evaluación del bloque (80%) para desbloquear el Bloque 2: WAN, Acceso y Nube."
+            },
+            concepts: [
+              { term: "Oversubscription (Sobresuscripción)", def: "Relación entre la suma máxima que podrían pedir todos los puertos de abajo versus la capacidad del cable de subida (uplink). Es normal que exista porque nunca todos transmiten al 100% en el mismo milisegundo.", analogy: "Un edificio de 200 departamentos funciona perfecto con 3 ascensores porque jamás bajan los 200 vecinos exactamente en el mismo segundo." },
+              { term: "Rangos Sanos de Sobresuscripción", def: "De Acceso a Distribución: entre 4:1 y 20:1. De Distribución a Core: entre 2:1 y 4:1. En servidores de Data Center: entre 1:1 y 3:1.", analogy: "Si un switch tiene 24 puertos de 1 Gbps (24 Gbps totales) y sube por un enlace de 10 Gbps, su relación es 2,4:1 (totalmente holgada y sana)." },
+              { term: "Utilización en Hora Punta (Peak)", def: "Porcentaje real de uso de un enlace medido en el horario de mayor carga de trabajo (ej. lunes a las 10:00 AM), nunca en el promedio de 24 horas que esconde los picos con la noche vacía.", analogy: "Una autopista se evalúa por cómo anda a las 8:30 de la mañana, no promediándola con las 3 de la madrugada." },
+              { term: "Umbral del 70% (Alerta Comercial y Planificación)", def: "Cuando un enlace supera el 70% de uso sostenido en hora punta, se activa la planificación comercial para proponer una ampliación de ancho de banda con tiempo.", analogy: "Es la luz preventiva en el tablero: te avisa que toca presentar propuesta de upgrade antes de que los usuarios sientan lentitud." },
+              { term: "Umbral del 80% (Urgencia Operativa)", def: "Sobre el 80% de ocupación, las filas de espera de los paquetes crecen rápido, disparando la latencia y las pérdidas en videollamadas.", analogy: "Una autopista al 85% de su capacidad ya tiene tacos en todas las salidas aunque los autos se sigan moviendo lento." },
+              { term: "Gestión de Capacidad", def: "Revisión periódica mensual de las curvas de crecimiento de tráfico para anticipar en qué mes una sucursal cruzará el 70%.", analogy: "Mirar la tendencia para decirle al cliente: 'A este ritmo de crecimiento, tu sucursal de Rancagua se saturará en marzo; ampliémosla ahora'." }
+            ],
+            integratorExample: "El informe mensual de operaciones muestra que el enlace principal de la casa matriz lleva tres semanas marcando 74% entre las 10:00 y las 12:00 hrs. Aún nadie ha puesto un reclamo, pero el ejecutivo toma ese gráfico y presenta proactivamente la propuesta de ampliación.",
+            activity: "Si un switch tiene 48 puertos de 1 Gbps y sube al core con 2 enlaces de 10 Gbps (20 Gbps de subida total), su sobresuscripción es 48 / 20 = 2,4:1 (dentro del rango sano)."
+          }
+        ]
+      },
+      {
+        id: 2,
+        code: "Bloque 2",
+        title: "WAN, Acceso y Nube",
+        desc: "Cómo se conectan las sucursales entre sí a lo largo del país, qué tecnologías compiten o conviven (MPLS, SD-WAN, Fibra Dedicada, GPON, 5G) y cómo se llega a la nube.",
+        modules: [
+          {
+            id: "M10",
+            title: "M10. Topologías WAN",
+            duration: "15 min",
+            objective: "Reconocer en cualquier plano si la red entre sedes es Hub-and-Spoke, Full Mesh o Partial Mesh, explicar qué negocio usa cada una y detectar de un vistazo un Punto Único de Falla (SPOF).",
+            whyItMatters: "La forma del mapa WAN define el presupuesto del proyecto y qué tan vulnerable es el cliente ante una caída de su casa matriz.",
+            prevNext: {
+              intro: "¡Bienvenidos al inicio del Bloque 2: WAN, Acceso y Nube! Comenzamos con el Módulo 10: Topologías WAN.",
+              outro: "En el próximo módulo (Módulo 11) veremos la conversación estrella del mundo corporativo: MPLS y SD-WAN."
+            },
+            concepts: [
+              { term: "Topología WAN", def: "Es el diseño o dibujo geométrico de cómo se conectan las distintas sucursales de una empresa entre sí.", analogy: "Es exactamente igual al mapa de rutas de vuelos de una aerolínea entre ciudades." },
+              { term: "Hub-and-Spoke (Estrella)", def: "Todas las sucursales remotas (spokes) se conectan a un único sitio central (el hub: casa matriz o data center). Cualquier comunicación pasa obligatoriamente por el centro.", analogy: "Como una aerolínea donde para ir de Antofagasta a Concepción estás obligado a hacer escala en Santiago. Es simple y económico, pero si cierra Santiago nadie vuela." },
+              { term: "Full Mesh (Malla Completa)", def: "Todas las sedes tienen enlaces directos contra todas las demás sedes. Ofrece máxima resistencia ante fallas, pero es sumamente costosa al crecer.", analogy: "Tener vuelos directos entre todas las ciudades: con 10 sucursales necesitarías pagar 45 enlaces distintos." },
+              { term: "Partial Mesh (Malla Parcial)", def: "Combina lo mejor de ambos mundos: las sucursales van en estrella hacia dos centros principales, y solo las sedes críticas tienen caminos directos entre sí.", analogy: "40 tiendas conectadas hacia dos data centers (principal y respaldo) que a su vez están unidos directamente entre sí." },
+              { term: "Punto Único de Falla (SPOF - Single Point of Failure)", def: "Cualquier equipo, enlace o edificio central sin respaldo cuya caída deja fuera de combate a toda la operación.", analogy: "Si ves un plano con 30 sucursales llegando a una sola casa matriz con un único router y un solo cable, acabas de encontrar un SPOF crítico." }
+            ],
+            integratorExample: "Una cadena de retail con 40 tiendas no necesita que la tienda de Temuco hable directo con la de Iquique, así que usa Hub-and-Spoke hacia su Data Center en Santiago, pero agrega un segundo centro de respaldo en Partial Mesh para eliminar el punto único de falla.",
+            activity: "Al mirar el plano de red de un cliente, busca siempre qué pasa si se corta la luz o la fibra en la sede central: si caen todas las sucursales de regiones, hay un SPOF que debes proponer respaldar."
+          },
+          {
+            id: "M11",
+            title: "M11. MPLS y SD-WAN",
+            duration: "15 min",
+            objective: "Explicar qué es MPLS y qué es SD-WAN, entender los conceptos de CoS, Underlay, Overlay, ZTP y Local Breakout, y argumentar por qué ambas tecnologías muchas veces conviven.",
+            whyItMatters: "Es el debate número uno con gerentes de TI. Entender que MPLS vende garantía privada de punta a punta y SD-WAN vende inteligencia sobre múltiples caminos te da criterio consultivo real.",
+            prevNext: {
+              intro: "Módulo 11: MPLS y SD-WAN (Bloque 2: WAN, Acceso y Nube).",
+              outro: "En el próximo módulo (Módulo 12) veremos la Última milla y tipos de acceso: fibra dedicada FTTO vs fibra compartida GPON vs 5G FWA."
+            },
+            concepts: [
+              { term: "MPLS (y L3VPN)", def: "Red privada construida íntegramente dentro de la infraestructura del operador de telecomunicaciones. Los datos de las sucursales viajan aislados y nunca pisan el Internet público.", analogy: "Es una autopista privada con peaje exclusivo por donde solo circulan los camiones de tu empresa, sin mezclarse con el tráfico de la calle." },
+              { term: "Clases de Servicio (CoS) y SLA de Punta a Punta", def: "Dentro de MPLS el operador prioriza el tráfico en carriles (CoS: la voz y el video van primero, el correo espera) y garantiza por contrato (SLA) la latencia y entrega en todo el trayecto.", analogy: "Tener una pista exclusiva solo para ambulancias y buses rápidos controlada de principio a fin por la misma concesionaria." },
+              { term: "SD-WAN (WAN Definida por Software)", def: "Tecnología inteligente que crea una red virtual segura por encima de cualquier combinación de enlaces físicos (MPLS, Internet de fibra, 4G/5G) y elige en tiempo real el mejor camino para cada aplicación.", analogy: "Es como usar una aplicación de GPS con tráfico en vivo: mide todas las calles disponibles cada segundo y desvía tus videollamadas por la vía más despejada." },
+              { term: "Underlay vs Overlay", def: "El Underlay son los cables y enlaces físicos reales (fibra, MPLS, 5G). El Overlay es el túnel lógico cifrado que el software SD-WAN construye por encima de esos enlaces.", analogy: "El Underlay es el pavimento físico de las calles de Santiago; el Overlay es la ruta inteligente que te dibuja la pantalla del navegador." },
+              { term: "ZTP (Zero Touch Provisioning)", def: "Capacidad de enviar un equipo SD-WAN nuevo en su caja a una sucursal en regiones para que, apenas alguien lo enchufe a la corriente y a Internet, descargue su configuración automáticamente.", analogy: "Instalación sin tocar consola: no necesitas mandar un ingeniero en avión a Punta Arenas para configurar el equipo." },
+              { term: "Local Breakout (Salida Local a Internet/Nube)", def: "En vez de obligar al tráfico de videollamadas o sistemas en la nube de una sucursal a viajar hasta la casa matriz para recién salir a Internet, SD-WAN lo saca directo a la nube desde la propia sucursal.", analogy: "Comprar el pan directo en el almacén de tu esquina en vez de tomar un bus hasta el centro de la ciudad para comprarlo allá." },
+              { term: "¿Por qué MPLS y SD-WAN conviven?", def: "Muchas empresas mantienen un enlace MPLS para su sistema contable o cajas críticas (porque exigen latencia garantizada por SLA) y suman enlaces de Internet con SD-WAN para ganar mucho ancho de banda a menor costo.", analogy: "No son enemigos: SD-WAN puede manejar el enlace MPLS como su autopista VIP y usar Internet fibra/5G como sus pistas adicionales de alta capacidad." }
+            ],
+            integratorExample: "Un banco mantiene MPLS para las transacciones de cajeros automáticos y suma SD-WAN sobre enlaces de fibra e inalámbricos 5G en cada sucursal para sacar por Local Breakout todas las videollamadas y el correo en la nube sin saturar su red central.",
+            activity: "Resume la diferencia clave: en MPLS el operador controla la ruta física privada con SLA de punta a punta; en SD-WAN el software decide dinámicamente por cuál de tus enlaces (MPLS, Internet o 5G) mandar cada aplicación."
+          },
+          {
+            id: "M12",
+            title: "M12. Última milla y tipos de acceso",
+            duration: "15 min",
+            objective: "Distinguir Fibra Dedicada (FTTO), Fibra Compartida (FTTH/GPON) y Acceso Inalámbrico Fijo (FWA 4G/5G), comprender qué es BFD y explicar por qué dos fibras por el mismo ducto no son redundancia real.",
+            whyItMatters: "La última milla es el tramo más caro de construir y donde ocurre la mayoría de los cortes físicos en la calle. Saber vender diversidad de ruta evita falsas promesas de continuidad.",
+            prevNext: {
+              intro: "Módulo 12: Última milla y tipos de acceso (Bloque 2: WAN, Acceso y Nube).",
+              outro: "En el próximo módulo (Módulo 13) entraremos al corazón de la Red del operador y las 5 métricas de Calidad de Servicio."
+            },
+            concepts: [
+              { term: "Última Milla", def: "El tramo físico final de cable o antena que va desde la red troncal del operador en la avenida hasta entrar a la sala de servidores de la sede del cliente.", analogy: "La autopista ya está hecha, pero construir el camino de entrada hasta el portón de tu parcela es lo más costoso y expuesto a accidentes." },
+              { term: "FTTO (Fibra Óptica Dedicada)", def: "Hilo de fibra punto a punto exclusivo desde la central del operador hasta la empresa, con velocidad simétrica garantizada y prioridad de reparación (SLA enterprise).", analogy: "Tener una vía de tren privada exclusiva para tu fábrica donde nadie más se sube ni te quita velocidad." },
+              { term: "FTTH / GPON (Fibra Compartida)", def: "Fibra que pasa por un divisor óptico (splitter) en la calle compartiendo la capacidad con 32 o 64 vecinos, normalmente asimétrica y sin SLA de nivel crítico.", analogy: "Es como un bus de acercamiento: es económico y rápido cuando va vacío, pero en hora punta compartes el espacio con todo el vecindario." },
+              { term: "FWA (Acceso Inalámbrico Fijo 4G / 5G)", def: "Conexión de banda ancha para una sucursal usando una antena receptora celular fija en vez de un cable físico desde la calle.", analogy: "Ideal para habilitar una faena rápida donde aún no llega fibra, o como segundo enlace de respaldo que no se corta si una excavadora rompe la vereda." },
+              { term: "Enlace Simétrico vs Asimétrico", def: "Simétrico entrega exactamente la misma velocidad de subida que de bajada (ej. 500/500 Mbps). Asimétrico da mucha bajada pero poca subida.", analogy: "En una casa solo descargas películas (asimétrico sirve); en una empresa de 200 personas subes respaldos, archivos a la nube y cámaras de video todo el día (exige simetría)." },
+              { term: "Diversidad Física de Ruta", def: "Exigencia de que el enlace principal y el enlace de respaldo entren al edificio por calles, cámaras subterráneas y postes completamente distintos.", analogy: "Regla de oro: 'Dos fibras metidas por el mismo tubo subterráneo no son redundancia, son dos facturas'. Si una retroexcavadora rompe esa esquina, corta las dos al mismo tiempo." },
+              { term: "Protocolo BFD", def: "Mecanismo ultrarrápido que vigila el enlace y detecta una caída en menos de un segundo para pasar el tráfico al enlace de respaldo sin que se corten las llamadas.", analogy: "Es un sensor láser instantáneo: en vez de esperar medio minuto a ver si vuelve la señal, cambia de pista en milisegundos." }
+            ],
+            integratorExample: "Para una empresa distribuidora se diseña: Casa Matriz con doble Fibra Dedicada (FTTO) entrando por calles distintas más BFD; Bodega regional con Fibra Dedicada principal y respaldo inalámbrico 5G (FWA); y tiendas pequeñas con fibra GPON más respaldo 4G.",
+            activity: "¿Por qué una sede crítica que exige 99,9% de disponibilidad no puede sostenerse solo con una fibra GPON? Porque GPON es compartida y ante un corte de calle no tiene segunda ruta física ni tiempos de reposición dedicados."
+          },
+          {
+            id: "M13",
+            title: "M13. Red del operador y calidad de servicio",
+            duration: "15 min",
+            objective: "Describir las capas del operador (Acceso, Agregación y Core), entender qué hacen BGP, Peering, Tránsito e IXP, y traducir cualquier queja del cliente a su métrica exacta (Disponibilidad, Latencia, Jitter, Packet Loss o Throughput).",
+            whyItMatters: "Cuando un cliente dice 'el internet anda pésimo', eso no dice nada técnico. Traducir su síntoma a Latencia, Jitter o Pérdida de Paquetes conecta al cliente con el NOC.",
+            prevNext: {
+              intro: "Módulo 13: Red del operador y calidad de servicio (Bloque 2: WAN, Acceso y Nube).",
+              outro: "En el próximo módulo (Módulo 14) cerraremos el Bloque 2 viendo Conectividad a Nube: cuándo salir por Internet y cuándo usar un circuito privado."
+            },
+            concepts: [
+              { term: "Acceso, Agregación y Core del Operador", def: "La red nacional del operador se divide en: Acceso (llega a los edificios), Agregación (reúne el tráfico de una comuna o ciudad) y Core (la gran columna vertebral interregional).", analogy: "Es la misma lógica de calles vecinales, avenidas comunales y Ruta 5, pero a escala de todo el país." },
+              { term: "BGP (Border Gateway Protocol)", def: "El gran protocolo mundial con el que los distintos operadores y grandes empresas se avisan mutuamente qué rangos de direcciones IP tienen conectados.", analogy: "Es el directorio de rutas aéreas entre todas las aerolíneas del planeta: si tu sesión BGP se cae, tu empresa deja de existir en el mapa de Internet." },
+              { term: "Peering, Tránsito e IXP", def: "Peering es cuando dos operadores conectan sus redes directo para intercambiar tráfico local gratis. IXP es el edificio neutro en Santiago donde todos hacen Peering. Tránsito es pagarle a un operador gigante internacional para llegar al resto del mundo.", analogy: "Peering es abrir una puerta directa en la pandereta con tu vecino para no salir a la calle; Tránsito es pagar peaje para usar la carretera internacional." },
+              { term: "Disponibilidad (99,9% vs 99,99%)", def: "Porcentaje del año en que el servicio está arriba funcionando. 99,9% permite hasta 8,8 horas de caída acumulada al año; 99,99% permite apenas 53 minutos en todo el año.", analogy: "Pasar de tres nueves (99,9%) a cuatro nueves (99,99%) multiplica la inversión porque obliga a duplicar cables, rutas y equipos." },
+              { term: "Latencia vs Jitter", def: "Latencia es el tiempo en milisegundos que tarda un paquete en ir y volver. Jitter es la variación o inestabilidad de ese tiempo entre un paquete y el siguiente.", analogy: "Latencia alta hace que en una llamada la gente se pise al hablar por el retraso; Jitter alto hace que la voz suene cortada o como robot." },
+              { term: "Pérdida de Paquetes (Packet Loss) y Throughput", def: "Packet Loss es el porcentaje de sobres que se destruyen en el camino por saturación o mala señal. Throughput es el caudal real de descarga logrado en la práctica.", analogy: "Si la videollamada se congela o pixela hay Pérdida de Paquetes; si un archivo gigante demora mucho en bajar hay bajo Throughput." }
+            ],
+            integratorExample: "Un cliente reclama que en sus reuniones virtuales las voces suenan robóticas. El centro de operaciones mide el enlace y ve que la latencia promedio está bien, pero el enlace va al 88% de uso provocando un Jitter altísimo. Se soluciona priorizando la voz (CoS) y ampliando el ancho de banda.",
+            activity: "Conecta cada síntoma con su métrica: 1) Voz robótica = Jitter, 2) Se pisan al hablar o escritorio remoto lento = Latencia, 3) Video congelado = Pérdida de paquetes, 4) Descarga lenta de archivos = Throughput."
+          },
+          {
+            id: "M14",
+            title: "M14. Conectividad a nube",
+            duration: "15 min",
+            objective: "Distinguir Nube Pública y Nube Híbrida, y explicar la diferencia entre llegar a la nube por Internet público versus contratar un Circuito Privado Dedicado.",
+            whyItMatters: "Hoy los servidores contables, bases de datos y respaldos de las empresas viven en grandes nubes públicas. Conectar esa nube de forma segura y estable es parte central del negocio de redes.",
+            prevNext: {
+              intro: "Módulo 14: Conectividad a nube, último módulo del Bloque 2: WAN, Acceso y Nube.",
+              outro: "¡Terminaste el Bloque 2! Aprueba la evaluación del bloque (80%) para desbloquear el Bloque 3: Seguridad y Normativa."
+            },
+            concepts: [
+              { term: "Nube Pública e Hiperescaladores", def: "Arrendar servidores, bases de datos y almacenamiento bajo demanda en los centros de datos de grandes proveedores tecnológicos mundiales, en vez de comprar fierros propios.", analogy: "Arrendar oficinas amobladas por mes en un gran edificio corporativo en vez de comprar un terreno y construir." },
+              { term: "Nube Híbrida", def: "Arquitectura donde la empresa mantiene parte de sus sistemas en su propio Data Center físico local y otra parte en la nube pública, funcionando conectados como uno solo.", analogy: "Tener la bóveda principal en tu edificio en Santiago, pero las oficinas de atención y análisis operando en el edificio de la nube." },
+              { term: "Acceso a Nube por Internet Público", def: "La forma estándar y económica de llegar a las aplicaciones de la nube a través del enlace de Internet normal o vía Local Breakout de SD-WAN.", analogy: "Ir al edificio de la nube en transporte público: es barato y resuelve el día a día de las sucursales, pero no controlas el tráfico de la calle." },
+              { term: "Circuito Privado a la Nube (Enlace Dedicado Cloud)", def: "Conexión privada directa desde la red de la empresa o del operador hasta el corazón del proveedor de nube, sin tocar jamás el Internet público.", analogy: "Construir un puente o pasillo privado cerrado con llave directamente entre tu edificio y el edificio de la nube." },
+              { term: "¿Cuándo se justifica un Circuito Privado a Nube?", def: "Se pide cuando hay: 1) Bases de datos críticas muy sensibles a la latencia, 2) Respaldos masivos de terabytes cada noche, 3) Normativa bancaria/salud que prohíbe sacar datos por Internet, o 4) Alto costo por tráfico de descarga.", analogy: "Las tiendas pequeñas van por Internet; el Data Center central que sincroniza todo el inventario cada 30 segundos va por Circuito Privado." }
+            ],
+            integratorExample: "Una empresa migra su sistema de gestión (ERP) a la nube. Sus 30 sucursales entran al sistema por Internet usando SD-WAN, pero su casa matriz y centro de distribución contratan un Circuito Privado dedicado para sincronizar bases de datos sin latencia y con máxima seguridad.",
+            activity: "Identifica las 4 señales comerciales que piden cotizar un Circuito Privado a la nube: sensibilidad extrema a la latencia, grandes volúmenes de datos diarios, exigencia regulatoria de seguridad y optimización de costos de salida de datos."
+          }
+        ]
+      },
+      {
+        id: 3,
+        code: "Bloque 3",
+        title: "Seguridad y Normativa",
+        desc: "Ciberseguridad moderna en redes corporativas (NGFW, Alta Disponibilidad, Zero Trust, ZTNA, SASE) y las leyes chilenas que obligan a las empresas a invertir en red y protección.",
+        modules: [
+          {
+            id: "M15",
+            title: "M15. Firewall de nueva generación y alta disponibilidad",
+            duration: "15 min",
+            objective: "Diferenciar un firewall tradicional de un NGFW (Inspección de Capa 7, IPS, Antimalware), explicar la Alta Disponibilidad (HA) y evitar el error clásico de dimensionar mirando el throughput bruto en vez del throughput con inspección.",
+            whyItMatters: "El error más caro al vender un firewall es mirar solo el título del folleto: cuando el cliente enciende las funciones de seguridad, el equipo se frena y ahoga el enlace si no se dimensionó bien.",
+            prevNext: {
+              intro: "¡Bienvenidos al inicio del Bloque 3: Seguridad y Normativa! Empezamos con el Módulo 15: Firewall de nueva generación y alta disponibilidad.",
+              outro: "En el próximo módulo (Módulo 16) veremos cómo proteger a los usuarios dentro y fuera de la oficina con Zero Trust, ZTNA y SASE."
+            },
+            concepts: [
+              { term: "Firewall Tradicional vs NGFW (Nueva Generación)", def: "El tradicional solo filtra mirando la IP y el número de puerto (Capa 3 y 4). El NGFW abre el paquete y mira en Capa 7 qué aplicación real va adentro, quién es el usuario y si oculta amenazas.", analogy: "El tradicional es un conserje que solo mira tu RUT y a qué piso vas; el NGFW además pasa tu mochila por rayos X para ver qué llevas adentro." },
+              { term: "Inspección de Capa 7", def: "Capacidad de distinguir aplicaciones específicas aunque todas viajen por el mismo puerto web seguro 443.", analogy: "Permite darle permiso al área de Comunicaciones para subir videos a redes sociales, pero bloquear exactamente esa misma función para el resto, aunque todo vaya por el puerto 443." },
+              { term: "IPS, Antimalware y Filtrado Web", def: "Tres escudos internos del NGFW: el IPS detecta y frena ataques en vivo, el Antimalware bloquea archivos infectados y el Filtrado Web impide entrar a páginas peligrosas o no laborales.", analogy: "Tener detector de metales, escáner de paquetes y lista negra de sitios prohibidos trabajando al mismo tiempo en la entrada." },
+              { term: "Throughput con Inspección (El dato real)", def: "Es la velocidad real de tráfico que el firewall es capaz de revisar cuando tiene encendidos el IPS, el antimalware y el control de aplicaciones. Siempre es mucho menor que el 'throughput bruto'.", analogy: "Un guardia deja pasar a 100 personas por minuto si no las mira (bruto), pero si debe revisarles el bolso a todas baja a 20 por minuto (con inspección). Si tu enlace es de 1 Gbps, el firewall debe dar 1 Gbps CON inspección." },
+              { term: "Alta Disponibilidad (HA: Activo/Pasivo y Activo/Activo)", def: "Instalar dos firewalls idénticos conectados en par. En Activo/Pasivo uno trabaja y el gemelo vigila listo para tomar el mando en milisegundos si el primero falla.", analogy: "Como el piloto y el copiloto de un avión comercial: si el piloto se indisponible, el copiloto asume el control sin que los pasajeros sientan un tirón." }
+            ],
+            integratorExample: "Un cliente con un enlace de fibra de 1 Gbps compra un firewall barato cuya portada dice 'Hasta 4 Gbps', pero en la letra chica su Throughput con Inspección es de solo 650 Mbps. Al activar el IPS y el antivirus, el internet de toda la empresa queda frenado en 650 Mbps.",
+            activity: "Las 3 preguntas obligatorias para cotizar un firewall sin equivocarse: 1) ¿De cuántos Mbps/Gbps es el enlace?, 2) ¿Qué funciones de inspección (IPS, antimalware, desencriptación) van a encender?, y 3) ¿Requiere par en Alta Disponibilidad (HA)?"
+          },
+          {
+            id: "M16",
+            title: "M16. Zero Trust, ZTNA y SASE",
+            duration: "15 min",
+            objective: "Explicar en una frase la filosofía Zero Trust, distinguir por qué ZTNA es mucho más seguro que una VPN tradicional y describir qué une la arquitectura SASE / SSE.",
+            whyItMatters: "Con el trabajo en terreno y las aplicaciones en la nube, el antiguo borde de la oficina desapareció. ZTNA y SASE son hoy el estándar de las propuestas de seguridad corporativa.",
+            prevNext: {
+              intro: "Módulo 16: Zero Trust, ZTNA y SASE (Bloque 3: Seguridad y Normativa).",
+              outro: "En el próximo módulo (Módulo 17) cerraremos el Bloque 3 revisando la Normativa chilena que condiciona la red (Leyes 21.663, 21.719, CMF y PCI)."
+            },
+            concepts: [
+              { term: "Modelo Perimetral Tradicional vs Zero Trust", def: "El modelo antiguo confiaba ciegamente en cualquiera que ya estuviera adentro de la oficina. Zero Trust ('Confianza Cero') exige nunca confiar por defecto y verificar siempre identidad, equipo y permiso en cada paso.", analogy: "El modelo antiguo era un castillo con muralla: cruzabas el puente y tenías acceso a todas las piezas. Zero Trust es un aeropuerto: te revisan en la entrada, en policía y de nuevo en la puerta de embarque." },
+              { term: "Mínimo Privilegio y Verificación Continua", def: "Mínimo privilegio da acceso únicamente a la aplicación que necesitas para tu cargo. Verificación continua evalúa la seguridad durante toda la sesión, no solo al poner la clave.", analogy: "Tu tarjeta magnética abre solo tu oficina (no la gerencia), y si a mitad de la tarde apagas el antivirus de tu notebook, el sistema te corta el acceso al instante." },
+              { term: "VPN Tradicional vs ZTNA (Zero Trust Network Access)", def: "La VPN tradicional crea un túnel desde la casa del trabajador que lo mete directo a toda la red interna de la empresa. ZTNA lo conecta exclusivamente con la aplicación específica autorizada, haciéndole invisible el resto de la red.", analogy: "La VPN le entrega al visitante las llaves de todo el edificio; ZTNA le pone un escolta que lo lleva con ojos vendados directo a la sala de su reunión y no le deja ver ningún otro pasillo." },
+              { term: "SASE y SSE", def: "SASE une en un solo servicio en la nube la red inteligente (SD-WAN) con toda la seguridad avanzada (SSE: Firewall en la nube, filtrado web, ZTNA y protección de datos cloud).", analogy: "En vez de obligar a todos los vendedores en terreno a pasar por la portería física de Santiago, pones una gran portería inteligente en la nube cerca de donde esté cada usuario." }
+            ],
+            integratorExample: "Una empresa con 250 personas en teletrabajo y vendedores en ruta reemplaza su antigua VPN (donde un notebook infectado en casa podía contagiar a los servidores centrales) por ZTNA, y lo une con el SD-WAN de sus sucursales bajo una arquitectura SASE.",
+            activity: "Explica en una frase la diferencia entre VPN y ZTNA: la VPN conecta al usuario a toda la red interna; ZTNA lo conecta únicamente a la aplicación específica que tiene permiso de usar."
+          },
+          {
+            id: "M17",
+            title: "M17. Normativa chilena que condiciona la red",
+            duration: "15 min",
+            objective: "Identificar las 4 grandes normativas que rigen a los clientes en Chile (Ley 21.663, Ley 21.719, CMF RAN 20-10 y PCI DSS), saber a qué industria obliga cada una y cómo se traducen en compras de red y seguridad.",
+            whyItMatters: "Cuando un gerente menciona una de estas normas, el proyecto deja de ser un 'deseo tecnológico' y pasa a ser una obligación legal con plazos y multas. Entenderlo cambia por completo la venta.",
+            prevNext: {
+              intro: "Módulo 17: Normativa chilena que condiciona la red, último módulo del Bloque 3: Seguridad y Normativa.",
+              outro: "¡Terminaste el Bloque 3! Rinde la evaluación del bloque (80%) para desbloquear el Bloque 4: Cómo se diseña y se vende."
+            },
+            concepts: [
+              { term: "Ley 21.663 (Ley Marco de Ciberseguridad de Chile)", def: "Crea la Agencia Nacional de Ciberseguridad (ANCI) y obliga a los Servicios Esenciales y Operadores de Importancia Vital a implementar continuidad, gestión de riesgos y reporte estricto de incidentes.", analogy: "Aplica de lleno a energía, agua sanitaria, salud/clínicas, telecomunicaciones, transporte y banca: les exige tener redes redundantes y monitoreadas 24x7." },
+              { term: "Ley 21.719 (Protección de Datos Personales)", def: "Actualiza la ley chilena al estándar europeo (GDPR), creando una Agencia de Protección de Datos y fuertes multas para quien filtre o maneje sin seguridad datos de clientes o empleados.", analogy: "Obliga a cualquier empresa con base de datos de personas a cifrar sus enlaces, controlar accesos (ZTNA/802.1X) y saber exactamente por dónde viaja la información." },
+              { term: "Norma CMF RAN 20-10 (Banca y Finanzas)", def: "Regulación de la Comisión para el Mercado Financiero sobre riesgo operacional y ciberseguridad para bancos, aseguradoras y emisores financieros.", analogy: "Por culpa de la RAN 20-10 un banco jamás te comprará un enlace sin respaldo ni un servicio donde el proveedor no sea auditable." },
+              { term: "Estándar PCI DSS v4.0.1 (Pagos con Tarjeta)", def: "Norma internacional obligatoria para todo comercio, supermercado, retail o empresa que procese, guarde o transmita datos de tarjetas de crédito o débito.", analogy: "Exige aislar en una VLAN exclusiva y detrás de un firewall todas las cajas registradoras y terminales de pago para que nadie pueda robar números de tarjetas." },
+              { term: "¿Cómo se traduce la ley en infraestructura de red?", def: "Toda norma legal aterriza en 5 componentes técnicos concretos: 1) Segmentación (VLANs), 2) Firewalls NGFW, 3) Doble enlace redundante (alta disponibilidad), 4) Monitoreo 24x7 con registro de eventos (logs) y 5) Proveedor gestionado auditable.", analogy: "La ley convierte las buenas prácticas de ingeniería en requisitos obligatorios para no recibir multas." }
+            ],
+            integratorExample: "El gerente de una clínica privada comenta que el directorio les exigió alinearse con la Ley 21.663 y la Ley 21.719. Traducido a nuestra propuesta: debemos cotizarles segmentación de red médica (VLANs), firewalls en alta disponibilidad, doble fibra por rutas distintas y monitoreo 24x7 documentado.",
+            activity: "Asocia rápido: Banco -> CMF RAN 20-10 y Ley 21.663; Clínica o Sanitaria -> Ley 21.663 y 21.719; Cadena de Retail con pago en cajas -> PCI DSS y Ley 21.719."
+          }
+        ]
+      },
+      {
+        id: 4,
+        code: "Bloque 4",
+        title: "Cómo se Diseña y se Vende",
+        desc: "El negocio detrás de la tecnología: etapas de una oportunidad, las 3 preguntas de oro del Discovery, cálculo de capacidad (Sizing), SLA vs Payback financiero, modelos operativos y lectura de propuestas.",
+        modules: [
+          {
+            id: "M18",
+            title: "M18. Flujo de diseño y las tres preguntas clave",
+            duration: "15 min",
+            objective: "Ordenar las 6 etapas por las que pasa un negocio (Discovery, Tech Selection, Architecture, Sizing, Proposal, Land & Expand) y dominar las 3 preguntas de oro que definen cualquier diseño.",
+            whyItMatters: "Un mal levantamiento inicial (Discovery) garantiza una propuesta equivocada. Hacer estas tres preguntas al principio ahorra semanas de retrabajo con preventa.",
+            prevNext: {
+              intro: "¡Bienvenidos al inicio del Bloque 4: Cómo se diseña y se vende! Partimos con el Módulo 18: Flujo de diseño y las tres preguntas clave.",
+              outro: "En el próximo módulo (Módulo 19) aprenderemos a calcular cuántos Mbps necesita realmente un cliente en Sizing: cómo se calcula la capacidad."
+            },
+            concepts: [
+              { term: "Etapa 1: Discovery (As-Is y To-Be)", def: "Levantar cómo está el cliente hoy (As-Is), qué dolores tiene y a qué estado futuro necesita llegar (To-Be).", analogy: "Es la consulta médica y los exámenes antes de recetar: quien cotiza sin hacer Discovery está recetando a ciegas." },
+              { term: "Etapas 2, 3 y 4: Tech Selection, Architecture y Sizing", def: "Tech Selection elige la tecnología adecuada; Architecture dibuja los planos y diagramas de la solución; Sizing calcula la capacidad exacta de los enlaces y equipos.", analogy: "Elegir el material de construcción, dibujar los planos con el arquitecto y calcular cuántos ascensores aguantarán el tráfico del edificio." },
+              { term: "Etapas 5 y 6: Proposal y Land & Expand", def: "Proposal es el documento técnico-comercial con lista de materiales, SLA y precios. Land & Expand es entrar con un primer proyecto ganador y expandir la cuenta en fases siguientes.", analogy: "Entrar resolviendo hoy el dolor urgente de los enlaces WAN y dejar sembrada la fase 2 de renovación de WiFi y seguridad." },
+              { term: "Pregunta Clave 1: ¿Qué pasa en tu negocio cuando esto falla?", def: "Mide el costo del minuto caído para el cliente. Define de inmediato el nivel de SLA y si la sede lleva enlace simple o doble enlace redundante con HA.", analogy: "Si te dice 'se me paran las cajas y dejo de facturar millones por hora', esa sede exige doble fibra con diversidad de ruta sí o sí." },
+              { term: "Pregunta Clave 2: ¿Dónde están tus datos y tus usuarios?", def: "Ubica si los sistemas viven en un servidor local o en la nube, y si la gente trabaja en oficina o en terreno. Define la topología WAN, el uso de SD-WAN/SASE y los circuitos a nube.", analogy: "Si los datos están en la nube y los vendedores en la calle, llevar todo a una casa matriz por MPLS antiguo no tiene sentido: pide SD-WAN y ZTNA." },
+              { term: "Pregunta Clave 3: ¿Quién lo va a operar en el día a día?", def: "Evalúa el tamaño y conocimiento del equipo informático del cliente. Define si se vende como servicio Gestionado (Managed), Co-gestionado o DIY.", analogy: "Si el cliente tiene un solo informático para ver desde las impresoras hasta el ERP, necesita un servicio 100% Gestionado." }
+            ],
+            integratorExample: "En una reunión de 15 minutos con una distribuidora haces las 3 preguntas: 1) Sin red no facturan ni despachan camiones, 2) Su sistema contable está en la nube y tienen 40 vendedores en ruta, 3) Su equipo TI son solo 2 personas. Con eso el diseño sale completo: SD-WAN con doble enlace en bodega, ZTNA y modelo Managed.",
+            activity: "Memoriza las 3 preguntas del Discovery: 1) ¿Qué pasa si cae? (Redundancia/SLA), 2) ¿Dónde están datos y usuarios? (WAN/Nube/Seguridad), 3) ¿Quién lo opera? (Managed/DIY)."
+          },
+          {
+            id: "M19",
+            title: "M19. Sizing: cómo se calcula la capacidad",
+            duration: "15 min",
+            objective: "Aplicar la fórmula de dimensionamiento de ancho de banda usando Usuarios, Concurrencia Real, Consumo por Aplicación y Margen de Crecimiento.",
+            whyItMatters: "Cotizar 'al ojo' o copiar la velocidad antigua que tenía el cliente hace 4 años termina en enlaces saturados o en presupuestos fuera de mercado.",
+            prevNext: {
+              intro: "Módulo 19: Sizing: cómo se calcula la capacidad (Bloque 4: Cómo se diseña y se vende).",
+              outro: "En el próximo módulo (Módulo 20) veremos las reglas comerciales y financieras en SLA, redundancia y la regla del payback."
+            },
+            concepts: [
+              { term: "Fórmula de Sizing", def: "Capacidad base = Total de Usuarios × % de Concurrencia Real × Requerimiento de Mbps por Aplicación (+ Margen de crecimiento).", analogy: "La comida de un matrimonio o buffet se calcula por cuántos invitados comen al mismo tiempo y qué plato piden, no por la población de la ciudad." },
+              { term: "Concurrencia Real", def: "Porcentaje de trabajadores de una sede que están usando activamente la red en el mismo minuto durante la hora punta.", analogy: "En una oficina administrativa normal suele ser del 60% al 70%; en un call center telefónico es prácticamente del 100%." },
+              { term: "Requerimiento por Aplicación", def: "Caudal que consume cada tarea: una videollamada en alta definición pide ~3 Mbps por persona, mientras que navegar o usar correo pide ~0,5 Mbps.", analogy: "No es lo mismo 100 personas leyendo planillas de texto que 100 personas en reuniones con cámara encendida al mismo tiempo." },
+              { term: "Margen de Crecimiento (Regla del <70%)", def: "Holgura adicional que se suma al cálculo para que el enlace parta operando cómodo bajo el umbral del 70% (visto en M9) y aguante el crecimiento de los próximos 2 a 3 años.", analogy: "No compras zapatos que te queden apretados el primer día: dejas margen para que el enlace trabaje a cerca de la mitad de su capacidad al partir." },
+              { term: "Ejercicio Guiado de Sizing (200 Usuarios)", def: "200 personas × 60% concurrencia = 120 activos simultáneos. Si 40 están en videollamada (40 × 3 Mbps = 120 Mbps) y 80 en navegación/correo (80 × 0,5 Mbps = 40 Mbps), el consumo pico hoy es 160 Mbps. Con margen sano (<70%), se recomienda un enlace simétrico de 300 Mbps.", analogy: "Con este cálculo simple en una pizarra le demuestras al cliente con números por qué los 100 Mbps que pedía se le van a quedar cortos." }
+            ],
+            integratorExample: "Un cliente pide renovar sus mismos 100 Mbps para su oficina de 150 personas. Al aplicar el Sizing en conjunto, nota que hoy usan videollamadas y sistemas en la nube que consumen 180 Mbps en hora punta: entiende de inmediato por qué debe pasar a 300 Mbps.",
+            activity: "Practica el cálculo: 150 usuarios × 70% concurrencia = 105 simultáneos. Si 50 hacen videollamada (50×3 = 150 Mbps) y 55 navegan (55×0,5 = 27,5 Mbps), suman 177,5 Mbps en hora punta -> recomiendas un enlace de 300 Mbps simétricos."
+          },
+          {
+            id: "M20",
+            title: "M20. SLA, redundancia y la regla del payback",
+            duration: "15 min",
+            objective: "Explicar por qué un SLA de 99,9% o 99,99% exige obligatoriamente doble enlace y alta disponibilidad, distinguir MRC de NRC y calcular el Payback en meses para definir el plazo del contrato.",
+            whyItMatters: "Une el diseño técnico con la aprobación financiera: evita prometer disponibilidades imposibles con un solo cable y enseña cómo hacer que los números cierren cuando hay obra civil cara.",
+            prevNext: {
+              intro: "Módulo 20: SLA, redundancia y la regla del payback (Bloque 4: Cómo se diseña y se vende).",
+              outro: "En el próximo módulo (Módulo 21) veremos cómo elegir el Modelo operativo: Managed, Co-managed o DIY."
+            },
+            concepts: [
+              { term: "SLA y la Matemática de los Nueves (99,9% vs 99,99%)", def: "El SLA compromete disponibilidad anual y multas. 99,9% permite máximo 8,8 horas sin servicio en todo un año; 99,99% permite apenas 53 minutos al año.", analogy: "Si un camión corta un poste de fibra en la calle, fusionar el cable demora entre 4 y 6 horas: con dos cortes al año ya incumpliste el 99,9%. Por eso un solo cable jamás sostiene un SLA alto." },
+              { term: "¿Qué exige en arquitectura un SLA alto?", def: "Para firmar 99,9% o 99,99% la arquitectura debe incluir: 1) Segunda última milla con diversidad física de calle/ducto, 2) Protocolo BFD (<1 seg) y 3) Equipos en Alta Disponibilidad (HA).", analogy: "Un SLA alto no es un descuento ni una cláusula en Word: es poner fierros y cables dobles por caminos separados." },
+              { term: "MRC (Cargo Mensual) y NRC (Cargo Único de Habilitación)", def: "MRC (Monthly Recurring Charge) es la tarifa mensual fija del servicio. NRC (Non-Recurring Charge) es el cobro único inicial por instalación, obra civil o habilitación.", analogy: "El NRC es el pie o matrícula de instalación; el MRC es la mensualidad." },
+              { term: "Inversión, Margen Bruto y Fórmula del Payback", def: "Inversión es lo que gasta el proveedor en tirar la fibra y comprar los equipos. Margen Bruto es el % que queda del MRC tras costos directos. Payback (meses en recuperar la inversión) = Inversión / (MRC × Margen Bruto).", analogy: "Si tirar la fibra y poner equipos cuesta 1.200 UF, el cliente paga un MRC de 100 UF al mes y el margen es 40% (ganas 40 UF limpias al mes): 1.200 / 40 = 30 meses de Payback." },
+              { term: "Regla de Permanencia Mínima", def: "El plazo del contrato debe ser mayor que los meses de Payback. Si el cliente quiere un contrato más corto que el Payback, debe pagar la diferencia como cargo inicial (NRC).", analogy: "Si demoras 30 meses en recuperar la inversión de la fibra y el cliente solo firma por 24 meses, tienes dos caminos: o firma a 36 meses, o paga un NRC al inicio que cubra los meses faltantes." }
+            ],
+            integratorExample: "Una planta industrial en las afueras de Rancagua pide SLA de 99,9% y contrato a 12 meses, pero construir los dos accesos de fibra cuesta una inversión alta que da un Payback de 28 meses. Se le explica la regla financiera y se cierra con contrato a 36 meses o pago de habilitación (NRC).",
+            activity: "Calcula este Payback: Inversión inicial = 900 UF, Cargo mensual (MRC) = 60 UF, Margen bruto = 50% (60 × 0,5 = 30 UF al mes). Payback = 900 / 30 = 30 meses. Si el cliente pide contrato a 24 meses, no cierra sin pedir 36 meses o cobrar NRC."
+          },
+          {
+            id: "M21",
+            title: "M21. Modelo operativo: Managed, Co-managed y DIY",
+            duration: "15 min",
+            objective: "Diferenciar los modelos Managed (Gestionado), Co-managed y DIY (Hazlo tú mismo) y clasificar a cualquier cliente usando los dos criterios de oro: Capacidad Técnica y Riesgo Operativo.",
+            whyItMatters: "Muchos clientes piden 'solo el enlace pelado (DIY)' creyendo que ahorran plata, pero cuando se les cae la configuración interna no tienen quién la arregle y culpan al proveedor.",
+            prevNext: {
+              intro: "Módulo 21: Modelo operativo: Managed, Co-managed y DIY (Bloque 4: Cómo se diseña y se vende).",
+              outro: "En el próximo módulo (Módulo 22) cerraremos el Bloque 4 aprendiendo Cómo se lee una propuesta técnico-comercial sin pasarse ningún detalle."
+            },
+            concepts: [
+              { term: "Managed (Servicio 100% Gestionado)", def: "El proveedor instala, monitorea 24x7, administra, aplica cambios de configuración y repara toda la solución. El cliente solo consume el servicio funcionando.", analogy: "Arrendar un departamento con conserjería, seguridad, mantención y reparaciones todo incluido." },
+              { term: "Co-managed (Co-gestionado)", def: "El proveedor monitorea la salud base y responde ante fallas físicas o críticas, pero el equipo de TI del cliente tiene consola compartida para mirar métricas y hacer ciertos cambios diarios.", analogy: "Vivir en un condominio donde la administración cuida las calderas y jardines, pero tú tienes llave para hacer arreglos dentro de tu piso." },
+              { term: "DIY (Do It Yourself / Autogestionado)", def: "El proveedor entrega únicamente el enlace o el equipamiento base y el cliente se hace 100% responsable de configurarlo, monitorearlo 24x7 y resolver incidentes.", analogy: "Comprar una parcela y construir tu casa: si se rompe una cañería un domingo a las 3 AM, tú mismo tienes que salir con la llave inglesa." },
+              { term: "Criterio 1: Capacidad Técnica Real", def: "Preguntar cuántos ingenieros certificados en esa tecnología específica trabajan hoy dentro del equipo del cliente.", analogy: "Un gran banco con 15 ingenieros de redes y ciberseguridad puede operar en Co-managed o DIY; una empresa mediana con un solo soporte generalista no puede." },
+              { term: "Criterio 2: Riesgo Operativo (Vacaciones / Rotación)", def: "Preguntar qué ocurre en la empresa si el único especialista que sabe manejar el firewall o el SD-WAN se enferma, sale de vacaciones en febrero o renuncia.", analogy: "Por eso el presupuesto nunca debe decidir el modelo operativo: elegir DIY sin espalda técnica sale carísimo en la primera caída." }
+            ],
+            integratorExample: "Una empresa de 100 empleados con un solo encargado de informática pide cotizar firewalls y SD-WAN en modalidad DIY para bajar la cuota mensual. Al preguntarle quién atenderá una alerta un sábado o cuando él esté de vacaciones, comprende el riesgo y cambia a servicio Managed.",
+            activity: "Recuerda las dos preguntas que definen el modelo operativo: 1) ¿Cuántas personas de tu equipo dominan hoy esta tecnología?, y 2) ¿Quién opera si esa persona está de vacaciones o renuncia?"
+          },
+          {
+            id: "M22",
+            title: "M22. Cómo se lee una propuesta técnico-comercial",
+            duration: "15 min",
+            objective: "Reconocer de inmediato las secciones críticas de una propuesta (Alcance, BoM, TCO, CAPEX vs OPEX, SLA y Land & Expand) y auditar con lupa los Supuestos y Exclusiones antes de enviar al cliente.",
+            whyItMatters: "El 90% de los problemas y atrasos en la implementación nacen de un 'Supuesto' escrito en la propuesta que nadie conversó con el cliente antes de firmar.",
+            prevNext: {
+              intro: "Módulo 22: Cómo se lee una propuesta técnico-comercial, último módulo del Bloque 4: Cómo se diseña y se vende.",
+              outro: "¡Terminaste el Bloque 4! Aprueba la evaluación del bloque (80%) para abrir el último bloque del curso, el Bloque 5: Delivery y Operación."
+            },
+            concepts: [
+              { term: "Alcance del Servicio", def: "Sección que delimita con precisión qué tareas, sedes y responsabilidades están incluidas en el proyecto y cuáles quedan expresamente fuera.", analogy: "Es el contrato con el constructor donde queda escrito que incluye pintar los muros, pero no incluye cambiar los muebles." },
+              { term: "BoM (Bill of Materials / Lista de Materiales)", def: "Tabla detallada con cada modelo de equipo, licencias de software, módulos ópticos y servicios profesionales con sus cantidades exactas.", analogy: "La receta detallada de ingredientes y materiales: si en el dibujo pusiste 10 APs pero en el BoM aparecen 6, hay un error grave." },
+              { term: "TCO (Costo Total de Propiedad) vs Precio Inicial", def: "El costo completo de tener la solución funcionando durante los 36 o 48 meses del proyecto (incluyendo equipos, licencias, soporte, energía y horas de operación).", analogy: "El costo de un auto no es solo el cheque que dejas en la automotora: el TCO suma bencina, permiso de circulación, seguro y revisiones técnicas por 3 años." },
+              { term: "CAPEX vs OPEX", def: "CAPEX es inversión de capital (comprar los equipos al contado al inicio). OPEX es gasto operativo mensual recurrente (pagar un servicio gestionado mensual que incluye todo).", analogy: "Muchas empresas prefieren transformar CAPEX en OPEX mediante servicios gestionados para no descapitalizarse de golpe." },
+              { term: "Supuestos y Exclusiones (La letra crítica)", def: "Condiciones técnicas que preventa asumió como verdaderas para calcular el precio (ej. 'Se asume que el cliente cuenta con cableado Cat6 certificado, racks disponibles y energía eléctrica respaldada en todas las sedes').", analogy: "Si la propuesta dice 'se asume cableado existente certificado' y cuando llega el instalador los cables están cortados, alguien tendrá que pagar ese sobrecosto. Siempre léelos con el cliente antes de firmar." }
+            ],
+            integratorExample: "Antes de enviar la propuesta final a una cadena de clínicas, el ejecutivo revisa la sección de Supuestos y ve que dice: 'El cliente proveerá canalización y cableado Cat6A hasta el cielo falso para los 40 APs'. Llama al cliente para confirmarlo, descubren que no existe tal cableado y lo agregan a tiempo a la oferta evitando un conflicto seguro en la obra.",
+            activity: "Checklist antes de mandar cualquier propuesta: 1) ¿El SLA prometido coincide con enlaces dobles en el BoM?, 2) ¿Están claros el Alcance y el modelo Managed/DIY?, y 3) ¿Revisé uno por uno los Supuestos y Exclusiones con el cliente?"
+          }
+        ]
+      },
+      {
+        id: 5,
+        code: "Bloque 5",
+        title: "Delivery y Operación",
+        desc: "Qué pasa desde el día que se firma el contrato hasta que la red entra en producción (LLD, Staging, Dual-running, Cutover, SAT), cómo opera el NOC 24x7 ante incidentes y el Caso Integrador final.",
+        modules: [
+          {
+            id: "M23",
+            title: "M23. Delivery, migración y cutover",
+            duration: "15 min",
+            objective: "Ordenar las etapas de implementación desde la firma hasta el paso a operaciones (LLD, Certificación, Staging/ZTP, Dual-running de 30 días, Cutover, SAT y Handover As-Built).",
+            whyItMatters: "Durante la instalación el cliente siempre llama a su contacto comercial para preguntar cómo va todo o por qué aún no retiran los equipos viejos. Conocer este flujo te permite dar respuestas sólidas.",
+            prevNext: {
+              intro: "¡Bienvenidos al inicio del Bloque 5: Delivery y Operación, el bloque final del curso! Comenzamos con el Módulo 23: Delivery, migración y cutover.",
+              outro: "En el próximo módulo (Módulo 24) veremos cómo se cuida y diagnostica la red en producción con Operación, NOC y troubleshooting."
+            },
+            concepts: [
+              { term: "Delivery y LLD (Low Level Design)", def: "Delivery es la construcción e implementación de lo vendido. El primer paso es el LLD: el documento de ingeniería de detalle con cada IP, VLAN y regla exacta, firmado por el cliente antes de tocar un cable.", analogy: "La propuesta comercial era el bosquejo arquitectónico; el LLD son los planos milimétricos de ingeniería estructural aprobados para construir." },
+              { term: "Staging y ZTP", def: "Staging es desembalar, actualizar, preconfigurar y probar los equipos en el laboratorio antes de despacharlos a las sucursales, dejándolos listos para conectarse con ZTP.", analogy: "Armar y probar los muebles en el taller con todas sus piezas para llegar a la oficina del cliente solo a instalarlos limpio y rápido." },
+              { term: "Migración en Paralelo (Dual-Running de 30 días)", def: "Instalar la red nueva al lado de la red antigua y pasar el tráfico gradualmente (primero usuarios no críticos, luego sistemas centrales), manteniendo ambas redes en convivencia por 30 días antes de dar de baja la antigua.", analogy: "Construir el puente nuevo al lado del puente viejo: pasas los autos al nuevo, y recién demueles el puente viejo cuando el nuevo lleva un mes entero funcionando sin fallas." },
+              { term: "Cutover (Ventana de Traspaso)", def: "El momento programado (casi siempre de noche o fin de semana) en que el tráfico productivo se cambia oficialmente desde la red antigua hacia la red nueva.", analogy: "El cambio de agujas en la vía del tren planificado al minuto para no interrumpir la operación del día hábil." },
+              { term: "SAT (Site Acceptance Test / Pruebas de Aceptación)", def: "Pruebas en vivo en la sede junto al cliente donde incluso se desenchufa deliberadamente el cable principal para comprobar con cronómetro que el respaldo automático funciona.", analogy: "El simulacro real de incendio: no basta con decir que hay extintor, hay que cortar el enlace primario y ver en pantalla que nadie perdió conexión." },
+              { term: "Handover y Documentación As-Built", def: "La entrega formal del proyecto terminado al equipo de Operaciones (NOC) junto con los planos As-Built ('como quedó realmente construido en terreno').", analogy: "Entregar las llaves del edificio terminado al administrador junto con el manual exacto de dónde quedó cada llave de paso." }
+            ],
+            integratorExample: "Para migrar 20 sucursales a SD-WAN sin parar las ventas: se firma el LLD, se hace Staging en laboratorio, se instalan los equipos en paralelo (Dual-running), se ejecuta el Cutover nocturno por tandas, se aprueban los cortes de prueba en el SAT, conviven 30 días por seguridad y se firma el Handover con planos As-Built.",
+            activity: "¿Por qué jamás se desmonta ni se da de baja el enlace antiguo la misma noche del Cutover? Porque la buena práctica exige una convivencia (Dual-running) de hasta 30 días para asegurar estabilidad total y vuelta atrás inmediata ante cualquier imprevisto."
+          },
+          {
+            id: "M24",
+            title: "M24. Operación, NOC y troubleshooting",
+            duration: "15 min",
+            objective: "Seguir el ciclo de vida de un incidente en el NOC 24x7, distinguir Severidades (SEV1 a SEV4), MTTR, RCA, Los 5 Porqués, Gestión de Cambios (RFC/CAB) y el diagnóstico ordenado Troubleshooting Bottom-Up.",
+            whyItMatters: "Cuando ocurre una caída importante, saber leer en qué paso va el NOC y qué significan MTTR, Rollback o RCA te permite manejar la comunicación con tranquilidad y respaldo técnico.",
+            prevNext: {
+              intro: "Módulo 24: Operación, NOC y troubleshooting (Bloque 5: Delivery y Operación).",
+              outro: "En el próximo módulo (Módulo 25) uniremos absolutamente todo el curso en una historia real completa: el Caso integrador de Distribuidora Andes."
+            },
+            concepts: [
+              { term: "NOC (Centro de Operaciones de Red) y Monitoreo 24x7", def: "Sala de control que vigila las 24 horas todos los enlaces y equipos de los clientes para detectar alarmas y caídas incluso antes de que el usuario llame.", analogy: "Es la torre de control del aeropuerto mirando todos los radares día y noche." },
+              { term: "Severidades (SEV1 a SEV4) y Flujo de Atención", def: "Clasifica cada ticket por su impacto de negocio: SEV1 es caída total de sede crítica; SEV4 es consulta menor. El flujo mide Detección (<5 min), Clasificación (<10 min), Diagnóstico (<30 min) y Escalamiento (Nivel 1, Nivel 2, Nivel 3 o fabricante).", analogy: "Es el triage de urgencia de una clínica: un infarto (SEV1) entra directo a pabellón; un resfrío (SEV4) va a consulta normal." },
+              { term: "MTTR y RCA (Informe de Causa Raíz)", def: "MTTR es el Tiempo Medio de Restauración (cuánto tardamos en devolver el servicio, ej. <4 horas). RCA es el informe forense oficial que se entrega en 48 horas explicando por qué ocurrió la falla y cómo se evitará que se repita.", analogy: "Primero apagas el incendio lo más rápido posible (MTTR) y dentro de 48 horas entregas el peritaje de bomberos (RCA)." },
+              { term: "Gestión de Problemas (Los 5 Porqués) y Gestión de Cambios (RFC / CAB)", def: "Los 5 Porqués buscan la raíz profunda de fallas repetidas. La Gestión de Cambios exige que toda modificación se pida por escrito (RFC), la apruebe un comité (CAB), se haga en ventana nocturna y tenga plan de vuelta atrás (Rollback).", analogy: "Ningún cambio se improvisa a mediodía: se agenda como cirugía programada de noche y con plan de reversa (Rollback) listo si algo sale mal." },
+              { term: "Troubleshooting Bottom-Up (Diagnóstico de Abajo hacia Arriba)", def: "Método ordenado de 5 pasos para encontrar fallas: Paso 0: ¿Hubo algún cambio anoche? -> Paso 1: Capa física (luz, cables, potencia óptica) -> Paso 2: Capa 3 (IP, ping, BGP, BFD) -> Paso 3: Capas 4 a 7 (DNS, puerto 443, reglas de firewall) -> Paso 4: Informar al cliente.", analogy: "Si no prende la lámpara, primero miras si se hicieron arreglos eléctricos anoche (Paso 0) y si está enchufada (Paso 1) antes de cambiar el techo." }
+            ],
+            integratorExample: "Se abre un ticket SEV2: la bodega de Rancagua puede navegar en páginas web pero no logra abrir el sistema ERP. El ingeniero del NOC aplica Bottom-Up: en el Paso 0 ve que anoche hubo una ventana de cambio (RFC) en el firewall central; en el Paso 1 y 2 todo responde ping, pero en el Paso 3 ve que el puerto 443 hacia el ERP quedó bloqueado. Ejecuta Rollback del cambio, restaura el servicio en 40 minutos (MTTR) y emite el RCA.",
+            activity: "Si un usuario sí puede navegar en internet pero no le abre una aplicación específica de negocio, ¿en qué paso del método Bottom-Up está la falla? En el Paso 3 (Capas 4 a 7: puerto específico o regla de firewall), porque las capas físicas y de red ya están funcionando."
+          },
+          {
+            id: "M25",
+            title: "M25. Caso integrador: Distribuidora Andes",
+            duration: "15 min",
+            objective: "Seguir de principio a fin la historia de un cliente corporativo conectando en un solo caso real todos los conceptos aprendidos desde el Módulo 1 hasta el Módulo 24.",
+            whyItMatters: "En las reuniones con clientes los temas no vienen separados por capítulos: aparecen mezclados el cableado, el SLA, la ley chilena, el payback y la nube en la misma mesa.",
+            prevNext: {
+              intro: "Módulo 25: Caso integrador: Distribuidora Andes (Bloque 5: Delivery y Operación).",
+              outro: "En el próximo y último módulo del curso (Módulo 26) haremos el Cierre general, el checklist de 10 competencias y la consolidación de tu Glosario Personal."
+            },
+            concepts: [
+              { term: "1. El Cliente y su Discovery (M18)", def: "Distribuidora Andes tiene 3 sedes: Casa Matriz en Santiago (200 usuarios), Bodega en Rancagua (40 usuarios) y Sucursal en Antofagasta (25 usuarios), además de vendedores en terreno y su ERP en la nube.", analogy: "Al responder las 3 preguntas: 1) Sin red no facturan ni despachan camiones, 2) Datos en la nube y vendedores móviles, 3) Solo 2 informáticos en TI -> Pide alta disponibilidad, arquitectura cloud y modelo 100% Gestionado (Managed)." },
+              { term: "2. Diseño LAN, Cableado y WiFi (M5 a M8)", def: "En Santiago se diseña un Collapsed Core en alta disponibilidad, 3 VLANs separadas (Oficina, Invitados y Cámaras) y WiFi 6E diseñado por capacidad con acceso seguro 802.1X.", analogy: "Al revisar el edificio se detecta cableado antiguo Cat5e sin certificar: se declara en los Supuestos de la propuesta y se cotiza el recambio a Cat6A certificado." },
+              { term: "3. Diseño WAN, Última Milla y Nube (M10 a M14)", def: "Topología Hub-and-Spoke corriendo SD-WAN con salida directa (Local Breakout) hacia la nube. Santiago lleva doble fibra dedicada FTTO con diversidad de calle y BFD; Rancagua lleva fibra dedicada + respaldo 5G FWA; Antofagasta lleva fibra compartida GPON + 4G.", analogy: "Cada sede recibe el tipo de acceso exacto según su criticidad de negocio, sin pagar de más en la oficina chica ni arriesgar la casa matriz." },
+              { term: "4. Seguridad, Normativa, Sizing y Payback (M15 a M22)", def: "Firewall NGFW en Alta Disponibilidad dimensionado por su Throughput con Inspección, ZTNA para los vendedores en ruta y resguardo por Ley 21.719 de datos personales. Sizing de 300 Mbps en Santiago con SLA 99,9%.", analogy: "Construir la fibra dedicada a la bodega de Rancagua arroja un Payback financiero de 30 meses, por lo que el contrato se estructura y firma a 36 meses." },
+              { term: "5. Delivery e Incidente Operativo en Producción (M23 y M24)", def: "Se aprueba el LLD, se hace Staging, se migra con 30 días de convivencia (Dual-running) y se valida cortando el cable principal en el SAT. Un mes después, un incidente SEV2 en Rancagua se resuelve en 40 minutos de MTTR aplicando el Paso 0 del método Bottom-Up (Rollback de una regla nocturna de firewall).", analogy: "Al cierre del trimestre, el reporte de Gestión de Capacidad (M9) muestra el enlace de Santiago al 55% en hora punta: operando sano y bajo control." }
+            ],
+            integratorExample: "Este caso demuestra que dominar el vocabulario completo te permite entender desde por qué el conector del poste o el cable Cat6A importan, hasta cómo estructurar un contrato a 36 meses con SLA de 99,9% y servicio Managed.",
+            activity: "Repasa las 5 etapas del caso Distribuidora Andes y verifica que comprendes el porqué de cada decisión técnica y comercial tomada."
+          },
+          {
+            id: "M26",
+            title: "M26. Cierre y glosario personal",
+            duration: "15 min",
+            objective: "Autoevaluar el dominio de las 10 competencias clave del curso y consolidar tu Glosario Personal como herramienta permanente de consulta en tu rol diario.",
+            whyItMatters: "El curso termina hoy, pero estas siglas y conceptos aparecerán mañana mismo en tus correos, tickets y reuniones con clientes.",
+            prevNext: {
+              intro: "¡Bienvenidos al Módulo 26: Cierre y glosario personal, la última cápsula del Bloque 5 y el gran cierre de nuestro curso!",
+              outro: "¡Felicitaciones! Has completado los 26 módulos. Rinde ahora la Evaluación Final del Bloque 5 (80%) para finalizar el programa."
+            },
+            concepts: [
+              { term: "Checklist 1 y 2: Ruta del Dato y Segmentación VLAN", def: "1) Explicar el viaje de un correo desde el notebook hasta Internet nombrando ONT, Firewall, Router, Switch y AP (M1-M4). 2) Explicar qué es una VLAN y por qué se aíslan visitas, cámaras y máquinas OT (M6).", analogy: "Tu base para nunca perderte al mirar el plano de una oficina." },
+              { term: "Checklist 3 y 4: Fibra Dedicada vs Compartida y MPLS vs SD-WAN", def: "3) Distinguir FTTO dedicada de GPON compartida y la diversidad de ducto para el SLA (M12). 4) Explicar con una analogía la diferencia entre la autopista privada MPLS y el GPS inteligente SD-WAN con Local Breakout (M11).", analogy: "El corazón de las conversaciones de conectividad entre sucursales." },
+              { term: "Checklist 5 y 6: Métricas de Calidad y Seguridad Zero Trust", def: "5) Asociar cada reclamo de usuario a Latencia, Jitter, Packet Loss o Throughput (M13). 6) Explicar en una frase la diferencia entre una VPN tradicional y ZTNA / SASE, además del Throughput con Inspección del NGFW (M15-M16).", analogy: "Hablar con precisión técnica cuando un cliente reclama lentitud o pide ciberseguridad." },
+              { term: "Checklist 7 y 8: Normativa Chilena y Regla del Payback", def: "7) Conectar las Leyes 21.663, 21.719, CMF RAN 20-10 y PCI DSS con exigencias de red (M17). 8) Calcular el Sizing, explicar por qué 99,9% exige doble enlace y calcular el Payback financiero que define el plazo del contrato (M19-M20).", analogy: "Transformar exigencias legales y financieras en propuestas sólidas que cierran negocio." },
+              { term: "Checklist 9 y 10: Ciclo de Delivery y Diagnóstico NOC", def: "9) Describir qué pasa entre la firma y el Cutover (LLD, Staging, Dual-running de 30 días, SAT y Handover As-Built en M23). 10) Leer un ticket del NOC entendiendo SEV1-4, MTTR, RCA y los pasos 0 al 4 del Troubleshooting Bottom-Up (M24).", analogy: "Acompañar al cliente con criterio total durante la implementación y la operación diaria." }
+            ],
+            integratorExample: "Con tu Glosario Personal escrito en tus propias palabras y estas 10 competencias dominadas, ya hablas el mismo idioma que preventa, ingeniería, delivery, el NOC y los gerentes de TI de tus clientes.",
+            activity: "¡Dirígete a la Evaluación del Bloque 5 en el menú lateral para completar el 100% de tu curso!"
+          }
+        ]
+      }
+    ];
+
+    const ALL_MODULES_FLAT = [];
+    COURSE_BLOCKS.forEach(b => {
+      b.modules.forEach((m, idx) => {
+        ALL_MODULES_FLAT.push({ ...m, blockId: b.id, indexInBlock: idx });
+      });
+    });
+
+    // ============================================================================
+    // MOTOR INTERNO DE EVALUACIONES (25 PREGUNTAS POR BLOQUE, ENTREGA 10)
+    // ============================================================================
+    function buildQuestionBankForBlock(block) {
+      const bank = [];
+      const allTerms = [];
+      block.modules.forEach(m => {
+        m.concepts.forEach(c => {
+          allTerms.push({
+            moduleId: m.id,
+            moduleTitle: m.title,
+            term: c.term,
+            def: c.def,
+            analogy: c.analogy
+          });
+        });
+      });
+
+      allTerms.forEach((item, idx) => {
+        const distractors = allTerms
+          .filter(t => t.term !== item.term)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3)
+          .map(t => t.def);
+
+        bank.push({
+          id: `B${block.id}_DEF_${idx}`,
+          type: "Concepto",
+          moduleRef: item.moduleId,
+          question: `Según lo revisado en ${item.moduleId}, ¿cuál es la definición correcta de "${item.term}"?`,
+          options: [item.def, ...distractors],
+          correctAnswer: item.def,
+          explanation: `En ${item.moduleId}, "${item.term}" corresponde a: ${item.def}`
+        });
+      });
+
+      allTerms.forEach((item, idx) => {
+        const distractors = allTerms
+          .filter(t => t.term !== item.term)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3)
+          .map(t => t.term);
+
+        bank.push({
+          id: `B${block.id}_ANA_${idx}`,
+          type: "Caso Práctico",
+          moduleRef: item.moduleId,
+          question: `En una situación práctica (${item.moduleId}), si aplicamos este ejemplo o analogía: "${item.analogy}", ¿a qué concepto nos referimos?`,
+          options: [item.term, ...distractors],
+          correctAnswer: item.term,
+          explanation: `Ese caso ilustra directamente el concepto de "${item.term}": ${item.def}`
+        });
+      });
+
+      block.modules.forEach((m, idx) => {
+        const otherModules = block.modules.filter(om => om.id !== m.id);
+        const distractorObjectives = otherModules.map(om => om.objective).slice(0, 3);
+        while (distractorObjectives.length < 3) {
+          distractorObjectives.push("Realizar la programación del código fuente interno del sistema operativo del servidor.");
+        }
+        bank.push({
+          id: `B${block.id}_MOD_${idx}`,
+          type: "Aplicación en el Rol",
+          moduleRef: m.id,
+          question: `Considerando el escenario de "${m.title}": "${m.integratorExample}" ¿Qué objetivo práctico resuelve este módulo?`,
+          options: [m.objective, ...distractorObjectives],
+          correctAnswer: m.objective,
+          explanation: `El objetivo central de ${m.title} es: ${m.objective}`
+        });
+      });
+
+      return bank.slice(0, 25);
+    }
+
+    const BLOCK_QUESTION_BANKS = {};
+    COURSE_BLOCKS.forEach(b => {
+      BLOCK_QUESTION_BANKS[b.id] = buildQuestionBankForBlock(b);
+    });
+
+    // ============================================================================
+    // CONEXIÓN DIRECTA CON SUPABASE Y SINCRONIZACIÓN DE USUARIOS + VIDEOS
+    // ============================================================================
+    let supabaseClient = null;
+    function initSupabase() {
+      if (window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
+        } catch (e) {
+          supabaseClient = null;
+        }
+      }
+    }
+
+    function getUsersDB() {
+      const raw = localStorage.getItem("re_users_db");
+      let db = raw ? JSON.parse(raw) : {};
+      if (!db[DEFAULT_ADMIN_ACCOUNT.email]) {
+        db[DEFAULT_ADMIN_ACCOUNT.email] = DEFAULT_ADMIN_ACCOUNT;
+        localStorage.setItem("re_users_db", JSON.stringify(db));
+      }
+      return db;
+    }
+
+    async function saveUserToDB(userObj) {
+      const db = getUsersDB();
+      db[userObj.email.toLowerCase()] = userObj;
+      localStorage.setItem("re_users_db", JSON.stringify(db));
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from("elearning_users").upsert({
+            email: userObj.email.toLowerCase(),
+            data: userObj,
+            updated_at: new Date().toISOString()
+          });
+        } catch (e) {}
+      }
+    }
+
+    async function syncAllUsersFromCloud() {
+      if (!supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient.from("elearning_users").select("*");
+        if (!error && data && Array.isArray(data)) {
+          const db = getUsersDB();
+          data.forEach(row => {
+            if (row.email === "__system_config__" && row.data?.customVideos) {
+              state.customVideos = row.data.customVideos;
+              localStorage.setItem("re_customVideos", JSON.stringify(state.customVideos));
+            } else if (row.email && row.data) {
+              db[row.email.toLowerCase()] = row.data;
+            }
+          });
+          localStorage.setItem("re_users_db", JSON.stringify(db));
+        }
+      } catch (e) {}
+    }
+
+    let currentUser = null;
+    let state = {
+      activeTab: "course",
+      currentView: { type: "module", blockId: 0, moduleId: "M1" },
+      customVideos: JSON.parse(localStorage.getItem("re_customVideos") || "{}"),
+      activeQuiz: null,
+      zoomContext: { concepts: [], index: 0 },
+      videoMaxTimeWatched: 0
+    };
+
+    // ============================================================================
+    // LÓGICA DE REGISTRO, LOGIN Y LOGOUT
+    // ============================================================================
+    function switchAuthMode(mode) {
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const tabLogin = document.getElementById("authTabLogin");
+      const tabReg = document.getElementById("authTabRegister");
+      const errBox = document.getElementById("authErrorBox");
+      errBox.classList.add("hidden");
+
+      if (mode === "login") {
+        loginForm.classList.remove("hidden");
+        registerForm.classList.add("hidden");
+        tabLogin.className = "py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition";
+        tabReg.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+      } else {
+        loginForm.classList.add("hidden");
+        registerForm.classList.remove("hidden");
+        tabReg.className = "py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition";
+        tabLogin.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+      }
+    }
+
+    function showAuthError(msg) {
+      const errBox = document.getElementById("authErrorBox");
+      errBox.textContent = msg;
+      errBox.classList.remove("hidden");
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnLoginSubmit");
+      btn.textContent = "Verificando cuenta...";
+      btn.disabled = true;
+
+      await syncAllUsersFromCloud();
+      const idInput = document.getElementById("loginId").value.trim().toLowerCase();
+      const passInput = document.getElementById("loginPassword").value;
+      const db = getUsersDB();
+
+      const foundUser = Object.values(db).find(
+        u => u.email?.toLowerCase() === idInput || u.username?.toLowerCase() === idInput
+      );
+
+      btn.textContent = "Ingresar a la Plataforma";
+      btn.disabled = false;
+
+      if (!foundUser || foundUser.password !== passInput) {
+        showAuthError("Credenciales incorrectas. Verifica tu correo/usuario y contraseña.");
+        return;
+      }
+
+      foundUser.lastLogin = new Date().toLocaleString("es-CL");
+      await saveUserToDB(foundUser);
+      loginSuccess(foundUser);
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnRegisterSubmit");
+      btn.textContent = "Creando cuenta...";
+      btn.disabled = true;
+
+      await syncAllUsersFromCloud();
+      const fullName = document.getElementById("regFullName").value.trim();
+      const username = document.getElementById("regUsername").value.trim();
+      const email = document.getElementById("regEmail").value.trim().toLowerCase();
+      const password = document.getElementById("regPassword").value;
+
+      const db = getUsersDB();
+      if (db[email]) {
+        btn.textContent = "Registrarme y Comenzar";
+        btn.disabled = false;
+        showAuthError("Ya existe una cuenta registrada con este correo electrónico.");
+        return;
+      }
+      if (Object.values(db).some(u => u.username?.toLowerCase() === username.toLowerCase())) {
+        btn.textContent = "Registrarme y Comenzar";
+        btn.disabled = false;
+        showAuthError("Ese nombre de usuario ya está en uso. Elige otro.");
+        return;
+      }
+
+      const newUser = {
+        username,
+        email,
+        password,
+        fullName,
+        role: "student",
+        createdAt: new Date().toLocaleDateString("es-CL"),
+        lastLogin: new Date().toLocaleString("es-CL"),
+        watchedVideos: [],
+        unlockedBlocks: [0],
+        blockTestStats: {},
+        personalNotes: {}
+      };
+
+      await saveUserToDB(newUser);
+      btn.textContent = "Registrarme y Comenzar";
+      btn.disabled = false;
+      loginSuccess(newUser);
+    }
+
+    function loginSuccess(userObj) {
+      currentUser = userObj;
+      localStorage.setItem("re_active_session_email", userObj.email.toLowerCase());
+      document.getElementById("authScreen").classList.add("hidden");
+      document.getElementById("currentUserNameUI").textContent = userObj.fullName || userObj.username;
+      document.getElementById("currentUserRoleUI").textContent = userObj.role === "admin" ? "Administrador" : `@${userObj.username}`;
+
+      const adminTabBtn = document.getElementById("tabBtnAdmin");
+      if (userObj.role === "admin") {
+        adminTabBtn.classList.remove("hidden");
+        adminTabBtn.classList.add("flex");
+      } else {
+        adminTabBtn.classList.add("hidden");
+        adminTabBtn.classList.remove("flex");
+      }
+
+      updateGlobalProgressUI();
+      switchMainTab("course");
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem("re_active_session_email");
+      document.getElementById("authScreen").classList.remove("hidden");
+      document.getElementById("loginPassword").value = "";
+    }
+
+    // ============================================================================
+    // REGLAS ESTRICTAS DE DESBLOQUEO SECUENCIAL (VIDEO 100% + EVALUACIÓN BLOQUE)
+    // ============================================================================
+    function isBlockUnlockedForUser(blockId) {
+      if (!currentUser) return false;
+      if (currentUser.role === "admin") return true;
+      return (currentUser.unlockedBlocks || [0]).includes(blockId);
+    }
+
+    function isModuleUnlockedForUser(blockId, moduleId) {
+      if (!currentUser) return false;
+      if (currentUser.role === "admin") return true;
+      if (!isBlockUnlockedForUser(blockId)) return false;
+
+      const block = COURSE_BLOCKS.find(b => b.id === blockId);
+      const modIdx = block.modules.findIndex(m => m.id === moduleId);
+      if (modIdx === 0) return true;
+
+      const prevModuleId = block.modules[modIdx - 1].id;
+      return currentUser.watchedVideos.includes(prevModuleId);
+    }
+
+    function areAllBlockVideosWatched(blockId) {
+      if (!currentUser) return false;
+      if (currentUser.role === "admin") return true;
+      const block = COURSE_BLOCKS.find(b => b.id === blockId);
+      return block.modules.every(m => currentUser.watchedVideos.includes(m.id));
+    }
+
+    // ============================================================================
+    // NAVEGACIÓN DE PESTAÑAS PRINCIPALES
+    // ============================================================================
+    function switchMainTab(tabName) {
+      state.activeTab = tabName;
+      const sidebar = document.getElementById("courseSidebar");
+      const btnCourse = document.getElementById("tabBtnCourse");
+      const btnDocs = document.getElementById("tabBtnDocs");
+      const btnGlossary = document.getElementById("tabBtnGlossary");
+      const btnAdmin = document.getElementById("tabBtnAdmin");
+
+      const baseClass = "px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ";
+      btnCourse.className = baseClass + (tabName === "course" ? "bg-blue-600 text-white shadow" : "text-slate-300 hover:text-white");
+      btnDocs.className = baseClass + (tabName === "documents" ? "bg-blue-600 text-white shadow" : "text-slate-300 hover:text-white");
+      btnGlossary.className = baseClass + (tabName === "glossary" ? "bg-blue-600 text-white shadow" : "text-slate-300 hover:text-white");
+
+      if (currentUser?.role === "admin") {
+        btnAdmin.className = baseClass + (tabName === "admin" ? "bg-amber-500 text-slate-950 shadow" : "text-amber-300 hover:text-white");
+      }
+
+      if (tabName === "course") {
+        sidebar.classList.remove("hidden");
+        renderSidebar();
+        renderMainContent();
+      } else {
+        sidebar.classList.add("hidden");
+        if (tabName === "documents") renderDocumentsTab();
+        if (tabName === "glossary") renderGlossaryTab();
+        if (tabName === "admin") renderAdminDashboardTab();
+      }
+      document.getElementById("mainContent").scrollTop = 0;
+    }
+
+    // ============================================================================
+    // PESTAÑA EXCLUSIVA DE ADMINISTRADOR: REPORTE DE AVANCE DE USUARIOS
+    // ============================================================================
+    async function renderAdminDashboardTab() {
+      const main = document.getElementById("mainContent");
+      await syncAllUsersFromCloud();
+      const db = getUsersDB();
+      const allUsers = Object.values(db).filter(u => u.role !== "admin");
+
+      const totalMods = ALL_MODULES_FLAT.length;
+      const totalUsers = allUsers.length;
+      const avgProgress = totalUsers === 0
+        ? 0
+        : Math.round(allUsers.reduce((acc, u) => acc + ((u.watchedVideos?.length || 0) / totalMods) * 100, 0) / totalUsers);
+      const graduatedCount = allUsers.filter(u => u.blockTestStats?.[5]?.passed).length;
+      const totalTestAttempts = allUsers.reduce((acc, u) => {
+        const stats = u.blockTestStats || {};
+        return acc + Object.values(stats).reduce((s, b) => s + (b.attempts || 0), 0);
+      }, 0);
+
+      main.innerHTML = `
+        <div class="max-w-7xl mx-auto space-y-6 pb-12">
+          <!-- Encabezado Admin -->
+          <div class="bg-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-400/30 px-3 py-1 rounded-full mb-2">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Panel de Control · Sincronizado con Supabase
+              </div>
+              <h2 class="text-2xl md:text-3xl font-extrabold">Seguimiento de Usuarios y Evaluaciones</h2>
+              <p class="text-xs md:text-sm text-slate-300 mt-1">
+                Monitorea en tiempo real quiénes han ingresado, qué videos han completado, sus calificaciones por bloque y la cantidad de intentos realizados.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <button onclick="renderAdminDashboardTab()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-400"></i> Actualizar Datos
+              </button>
+              <button onclick="openAdminConfigModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+                <i data-lucide="video" class="w-4 h-4 text-blue-400"></i> Enlaces de Videos
+              </button>
+              <button onclick="exportUsersCSV()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow flex items-center gap-1.5">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Excel (CSV)
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjetas de KPIs -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-xs font-bold uppercase text-slate-400">Usuarios Registrados</div>
+              <div class="text-3xl font-extrabold text-slate-900 mt-1">${totalUsers}</div>
+              <div class="text-xs text-slate-500 mt-1">Participantes en plataforma</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-xs font-bold uppercase text-slate-400">Avance Promedio</div>
+              <div class="text-3xl font-extrabold text-blue-600 mt-1">${avgProgress}%</div>
+              <div class="text-xs text-slate-500 mt-1">Sobre los 26 videos obligatorios</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-xs font-bold uppercase text-slate-400">Evaluaciones Rendidas</div>
+              <div class="text-3xl font-extrabold text-amber-600 mt-1">${totalTestAttempts}</div>
+              <div class="text-xs text-slate-500 mt-1">Intentos totales acumulados</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-xs font-bold uppercase text-slate-400">Curso 100% Aprobado</div>
+              <div class="text-3xl font-extrabold text-emerald-600 mt-1">${graduatedCount}</div>
+              <div class="text-xs text-slate-500 mt-1">Aprobaron hasta el Bloque 5</div>
+            </div>
+          </div>
+
+          <!-- Tabla Detallada de Usuarios -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50">
+              <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                Detalle por Participante
+              </h3>
+              <input
+                id="adminUserSearch"
+                oninput="filterAdminTable()"
+                type="text"
+                placeholder="Buscar por nombre, usuario o correo..."
+                class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-900 text-white text-[11px] uppercase tracking-wider">
+                    <th class="py-3 px-4">Participante</th>
+                    <th class="py-3 px-3">Último Acceso</th>
+                    <th class="py-3 px-4">Avance Videos (26)</th>
+                    <th class="py-3 px-2.5 text-center">B0</th>
+                    <th class="py-3 px-2.5 text-center">B1</th>
+                    <th class="py-3 px-2.5 text-center">B2</th>
+                    <th class="py-3 px-2.5 text-center">B3</th>
+                    <th class="py-3 px-2.5 text-center">B4</th>
+                    <th class="py-3 px-2.5 text-center">B5</th>
+                  </tr>
+                </thead>
+                <tbody id="adminUsersTableBody" class="divide-y divide-slate-200 text-xs">
+                  ${renderAdminUserRows(allUsers)}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+
+      lucide.createIcons();
+    }
+
+    function renderAdminUserRows(usersList) {
+      if (usersList.length === 0) {
+        return `
+          <tr>
+            <td colspan="9" class="py-10 text-center text-slate-400">
+              Aún no hay participantes registrados. Cuando los miembros del equipo creen su cuenta aparecerán automáticamente en esta tabla.
+            </td>
+          </tr>
+        `;
+      }
+
+      const totalMods = ALL_MODULES_FLAT.length;
+      return usersList.map(u => {
+        const watchedCount = u.watchedVideos?.length || 0;
+        const pct = Math.round((watchedCount / totalMods) * 100);
+        const lastModWatched = watchedCount > 0 ? u.watchedVideos[watchedCount - 1] : "Sin iniciar";
+
+        const blockCells = [0, 1, 2, 3, 4, 5].map(bId => {
+          const st = u.blockTestStats?.[bId];
+          if (!st || !st.attempts) {
+            return `<td class="py-3 px-2 text-center text-slate-400">—</td>`;
+          }
+          const badgeClass = st.passed
+            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+            : "bg-rose-100 text-rose-800 border-rose-300";
+          return `
+            <td class="py-3 px-2 text-center">
+              <div class="inline-flex flex-col items-center px-2 py-1 rounded-lg border ${badgeClass}">
+                <span class="font-extrabold text-[11px]">${st.bestScore * 10}% (${st.bestScore}/10)</span>
+                <span class="text-[10px] opacity-80">${st.attempts} ${st.attempts === 1 ? 'intento' : 'intentos'}</span>
+              </div>
+            </td>
+          `;
+        }).join("");
+
+        return `
+          <tr class="hover:bg-slate-50 transition admin-user-row" data-search="${(u.fullName + ' ' + u.username + ' ' + u.email).toLowerCase()}">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900">${u.fullName || u.username}</div>
+              <div class="text-[11px] text-slate-500">${u.email} · <span class="font-mono text-blue-600">@${u.username}</span></div>
+            </td>
+            <td class="py-3.5 px-3 text-slate-600 whitespace-nowrap">
+              <div>${u.lastLogin || "—"}</div>
+              <div class="text-[10px] text-slate-400">Creado: ${u.createdAt || "—"}</div>
+            </td>
+            <td class="py-3.5 px-4 min-w-[180px]">
+              <div class="flex items-center justify-between text-[11px] font-bold mb-1">
+                <span class="text-slate-700">${watchedCount}/${totalMods} videos (${pct}%)</span>
+                <span class="text-blue-600">Último: ${lastModWatched}</span>
+              </div>
+              <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500" style="width: ${pct}%"></div>
+              </div>
+            </td>
+            ${blockCells}
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function filterAdminTable() {
+      const q = (document.getElementById("adminUserSearch")?.value || "").toLowerCase();
+      document.querySelectorAll(".admin-user-row").forEach(row => {
+        const text = row.getAttribute("data-search") || "";
+        row.style.display = text.includes(q) ? "" : "none";
+      });
+    }
+
+    function exportUsersCSV() {
+      const db = getUsersDB();
+      const users = Object.values(db).filter(u => u.role !== "admin");
+      const headers = [
+        "Nombre", "Usuario", "Correo", "Fecha Registro", "Ultimo Acceso",
+        "Videos Vistos (de 26)", "Porcentaje Avance",
+        "B0 Nota Max", "B0 Intentos",
+        "B1 Nota Max", "B1 Intentos",
+        "B2 Nota Max", "B2 Intentos",
+        "B3 Nota Max", "B3 Intentos",
+        "B4 Nota Max", "B4 Intentos",
+        "B5 Nota Max", "B5 Intentos"
+      ];
+
+      const rows = users.map(u => {
+        const w = u.watchedVideos?.length || 0;
+        const pct = Math.round((w / 26) * 100) + "%";
+        const cols = [
+          `"${u.fullName || ""}"`, `"${u.username}"`, `"${u.email}"`, `"${u.createdAt || ""}"`, `"${u.lastLogin || ""}"`,
+          w, pct
+        ];
+        [0, 1, 2, 3, 4, 5].forEach(bId => {
+          const st = u.blockTestStats?.[bId];
+          cols.push(st ? `${st.bestScore * 10}%` : "Sin rendir");
+          cols.push(st ? st.attempts : 0);
+        });
+        return cols.join(",");
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Reporte_Avance_Redes_Enterprise_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ============================================================================
+    // PESTAÑA DE DOCUMENTOS DESCARGABLES
+    // ============================================================================
+    function renderDocumentsTab() {
+      const main = document.getElementById("mainContent");
+      const colorClasses = {
+        blue: { badge: "bg-blue-50 text-blue-700 border-blue-200", iconBg: "bg-blue-600", btn: "bg-blue-600 hover:bg-blue-500" },
+        indigo: { badge: "bg-indigo-50 text-indigo-700 border-indigo-200", iconBg: "bg-indigo-600", btn: "bg-indigo-600 hover:bg-indigo-500" },
+        emerald: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", iconBg: "bg-emerald-600", btn: "bg-emerald-600 hover:bg-emerald-500" },
+        amber: { badge: "bg-amber-50 text-amber-800 border-amber-200", iconBg: "bg-amber-600", btn: "bg-amber-600 hover:bg-amber-500" }
+      };
+
+      main.innerHTML = `
+        <div class="max-w-5xl mx-auto space-y-6 pb-12">
+          <div class="bg-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-400/20 px-3 py-1 rounded-full mb-2">
+                <i data-lucide="folder-down" class="w-3.5 h-3.5"></i> Biblioteca Oficial del Programa
+              </div>
+              <h2 class="text-2xl md:text-3xl font-extrabold">Material de Estudio y Guías Descargables</h2>
+              <p class="text-xs md:text-sm text-slate-300 mt-1 max-w-2xl">
+                Descarga los manuales oficiales, las 150 láminas ilustradas de redes y fibra óptica, y el plan de estudio de 30 días para consulta permanente.
+              </p>
+            </div>
+            <button onclick="switchMainTab('course')" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Curso
+            </button>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            ${COURSE_DOCUMENTS.map(doc => {
+              const c = colorClasses[doc.color] || colorClasses.blue;
+              return `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-6 flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                      <div class="w-12 h-12 rounded-2xl ${c.iconBg} text-white flex items-center justify-center shadow-md shrink-0">
+                        <i data-lucide="${doc.icon}" class="w-6 h-6"></i>
+                      </div>
+                      <div class="flex flex-wrap gap-1.5 justify-end">
+                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border ${c.badge}">${doc.category}</span>
+                        <span class="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">${doc.pages}</span>
+                      </div>
+                    </div>
+
+                    <h3 class="text-lg font-extrabold text-slate-900 leading-snug">${doc.title}</h3>
+                    <p class="text-xs font-semibold text-slate-500 mt-0.5 mb-3">${doc.subtitle}</p>
+                    <p class="text-xs md:text-sm text-slate-600 leading-relaxed mb-4">${doc.description}</p>
+
+                    <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 mb-5">
+                      <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Contenido incluido:</div>
+                      <ul class="space-y-1.5 text-xs text-slate-700">
+                        ${doc.highlights.map(h => `
+                          <li class="flex items-start gap-2">
+                            <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5"></i>
+                            <span>${h}</span>
+                          </li>
+                        `).join("")}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div class="text-[11px] text-slate-400 truncate">
+                      <span class="font-mono text-slate-600">${doc.fileName}</span>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <a href="${doc.filePath}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Abrir
+                      </a>
+                      <a href="${doc.filePath}" download="${doc.fileName}" class="px-4 py-2 rounded-xl ${c.btn} text-white font-bold text-xs flex items-center gap-1.5 shadow transition">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Descargar
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // ============================================================================
+    // PESTAÑA DE GLOSARIO
+    // ============================================================================
+    function renderGlossaryTab() {
+      const main = document.getElementById("mainContent");
+      main.innerHTML = `
+        <div class="max-w-5xl mx-auto space-y-6 pb-12">
+          <div class="bg-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-400/20 px-3 py-1 rounded-full mb-2">
+                <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Diccionario Interactivo
+              </div>
+              <h2 class="text-2xl md:text-3xl font-extrabold">Glosario Consolidado del Curso</h2>
+              <p class="text-xs md:text-sm text-slate-300 mt-1">
+                Todos los conceptos técnicos de los 26 módulos traducidos a lenguaje simple con su analogía práctica.
+              </p>
+            </div>
+            <button onclick="switchMainTab('course')" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Curso
+            </button>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <input
+              id="glossarySearchInput"
+              oninput="filterGlossaryItems()"
+              type="text"
+              placeholder="Escribe cualquier sigla o término para filtrar (ej. VLAN, Gateway, GPON, BFD, Payback, ZTNA, OTDR...)"
+              class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div id="glossaryListContainer" class="grid md:grid-cols-2 gap-4"></div>
+        </div>
+      `;
+      filterGlossaryItems();
+      lucide.createIcons();
+    }
+
+    function filterGlossaryItems() {
+      const query = (document.getElementById("glossarySearchInput")?.value || "").toLowerCase();
+      const container = document.getElementById("glossaryListContainer");
+      if (!container) return;
+
+      const allItems = [];
+      COURSE_BLOCKS.forEach(b => {
+        b.modules.forEach(m => {
+          m.concepts.forEach(c => {
+            if (
+              c.term.toLowerCase().includes(query) ||
+              c.def.toLowerCase().includes(query) ||
+              c.analogy.toLowerCase().includes(query) ||
+              m.id.toLowerCase().includes(query)
+            ) {
+              allItems.push({ ...c, modId: m.id });
+            }
+          });
+        });
+      });
+
+      container.innerHTML = allItems.map(item => `
+        <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="font-extrabold text-slate-900 text-base">${item.term}</span>
+              <span class="text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full shrink-0">${item.modId}</span>
+            </div>
+            <p class="text-xs md:text-sm text-slate-700 leading-relaxed mb-3">${item.def}</p>
+          </div>
+          <div class="text-xs text-amber-950 bg-amber-50/90 p-3 rounded-xl border border-amber-200/80">
+            <strong class="text-amber-800">💡 Analogía / Ejemplo:</strong> ${item.analogy}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // ============================================================================
+    // SIDEBAR CON CANDADOS POR MÓDULO (VIDEO OBLIGATORIO) Y POR BLOQUE (TEST 80%)
+    // ============================================================================
+    function renderSidebar() {
+      if (!currentUser) return;
+      const container = document.getElementById("sidebarContainer");
+      let html = "";
+
+      COURSE_BLOCKS.forEach(block => {
+        const blockUnlocked = isBlockUnlockedForUser(block.id);
+        const testStat = currentUser.blockTestStats?.[block.id];
+        const testPassed = testStat?.passed;
+        const canTakeTest = areAllBlockVideosWatched(block.id);
+
+        html += `
+          <div class="rounded-xl border ${blockUnlocked ? 'border-slate-700 bg-slate-800/60' : 'border-slate-800 bg-slate-900/50 opacity-60'} overflow-hidden">
+            <div class="p-3 bg-slate-800/90 flex items-center justify-between border-b border-slate-700/70">
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider ${blockUnlocked ? 'text-blue-400' : 'text-slate-500'} flex items-center gap-1.5">
+                  ${blockUnlocked ? '<i data-lucide="unlock" class="w-3.5 h-3.5 text-emerald-400"></i>' : '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-500"></i>'}
+                  ${block.code}
+                </div>
+                <div class="font-bold text-sm text-white leading-snug mt-0.5">${block.title}</div>
+              </div>
+              ${testPassed ? `<span class="text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md">${testStat.bestScore * 10}% ✓</span>` : ''}
+            </div>
+
+            <div class="p-2 space-y-1">
+              ${block.modules.map((mod, mIdx) => {
+                const isSelected = state.currentView.type === "module" && state.currentView.moduleId === mod.id;
+                const isWatched = currentUser.watchedVideos.includes(mod.id);
+                const modUnlocked = isModuleUnlockedForUser(block.id, mod.id);
+                const prevModId = mIdx > 0 ? block.modules[mIdx - 1].id : "";
+
+                return `
+                  <button
+                    onclick="${
+                      modUnlocked
+                        ? `selectModule(${block.id}, '${mod.id}')`
+                        : !blockUnlocked
+                          ? `alert('Para abrir este bloque debes aprobar primero la evaluación del ${COURSE_BLOCKS[block.id - 1].code} con un mínimo de 80% (8/10).')`
+                          : `alert('Para desbloquear ${mod.id} debes terminar de ver el video completo de ${prevModId} al menos una vez.')`
+                    }"
+                    class="w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between transition ${
+                      isSelected
+                        ? 'bg-blue-600 text-white font-semibold shadow'
+                        : modUnlocked
+                          ? 'hover:bg-slate-700/70 text-slate-300'
+                          : 'cursor-not-allowed text-slate-500'
+                    }"
+                  >
+                    <span class="truncate pr-2">${mod.title}</span>
+                    ${
+                      isWatched
+                        ? `<i data-lucide="check-circle-2" class="w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-emerald-400'}"></i>`
+                        : !modUnlocked
+                          ? `<i data-lucide="lock" class="w-3.5 h-3.5 shrink-0 text-slate-600"></i>`
+                          : `<i data-lucide="play-circle" class="w-3.5 h-3.5 shrink-0 text-blue-400"></i>`
+                    }
+                  </button>
+                `;
+              }).join("")}
+
+              <!-- BOTÓN DE EVALUACIÓN DEL BLOQUE -->
+              <button
+                onclick="${
+                  canTakeTest
+                    ? `startBlockQuiz(${block.id})`
+                    : `alert('Debes ver el video completo de todos los módulos del ${block.code} antes de rendir la evaluación.')`
+                }"
+                class="w-full mt-2 px-3 py-2.5 rounded-lg text-xs font-bold flex items-center justify-between border transition ${
+                  state.currentView.type === "quiz" && state.currentView.blockId === block.id
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow'
+                    : testPassed
+                      ? 'bg-emerald-950/60 text-emerald-300 border-emerald-700/60 hover:bg-emerald-900/60'
+                      : canTakeTest
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 hover:bg-amber-500/25'
+                        : 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed'
+                }"
+              >
+                <span class="flex items-center gap-1.5">
+                  <i data-lucide="${canTakeTest ? 'award' : 'lock'}" class="w-4 h-4"></i>
+                  Evaluación ${block.code}
+                </span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900/60 text-white">80% (8/10)</span>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // ============================================================================
+    // VISTA DE UN MÓDULO Y REPRODUCTOR CON BLOQUEO HASTA VER EL 100%
+    // ============================================================================
+    function selectModule(blockId, moduleId) {
+      if (!isModuleUnlockedForUser(blockId, moduleId)) return;
+      state.currentView = { type: "module", blockId, moduleId };
+      state.videoMaxTimeWatched = 0;
+      if (state.activeTab !== "course") {
+        switchMainTab("course");
+        return;
+      }
+      renderSidebar();
+      renderMainContent();
+      document.getElementById("mainContent").scrollTop = 0;
+    }
+
+    function getVideoSourceForModule(moduleId) {
+      if (state.customVideos[moduleId] && state.customVideos[moduleId].trim() !== "") {
+        return state.customVideos[moduleId].trim();
+      }
+      return `videos/${moduleId}.mp4`;
+    }
+
+    function renderMainContent() {
+      if (!currentUser) return;
+      const main = document.getElementById("mainContent");
+
+      if (state.currentView.type === "quiz") {
+        renderQuizView(main);
+        return;
+      }
+
+      const block = COURSE_BLOCKS.find(b => b.id === state.currentView.blockId);
+      const modIndex = block.modules.findIndex(m => m.id === state.currentView.moduleId);
+      const mod = block.modules[modIndex];
+      const isWatched = currentUser.watchedVideos.includes(mod.id) || currentUser.role === "admin";
+      const videoSrc = getVideoSourceForModule(mod.id);
+
+      state.zoomContext = { concepts: mod.concepts, index: 0 };
+
+      main.innerHTML = `
+        <div class="max-w-5xl mx-auto space-y-6 pb-12">
+
+          <!-- ENCABEZADO DEL MÓDULO -->
+          <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-blue-800/40">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider bg-blue-600 px-3 py-1 rounded-full">${block.code}: ${block.title}</span>
+                <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${mod.duration}
+                </span>
+                ${modIndex === 0 ? `<span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-1 rounded-full">Inicio de Bloque</span>` : ''}
+                ${modIndex === block.modules.length - 1 ? `<span class="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-full">Cierre de Bloque</span>` : ''}
+              </div>
+
+              <!-- Indicador de estado del video obligatorio -->
+              <div id="videoStatusBadge" class="text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 ${
+                isWatched
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
+              }">
+                <i data-lucide="${isWatched ? 'check-circle-2' : 'play-circle'}" class="w-4 h-4"></i>
+                <span>${isWatched ? 'Video Visto Completo (Puedes repetirlo libremente)' : 'Requisito: Ver el video completo para avanzar'}</span>
+              </div>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">${mod.title}</h2>
+            <p class="text-xs text-blue-200 mt-2 italic">"${mod.prevNext.intro}"</p>
+
+            <div class="grid md:grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-800/90 text-sm">
+              <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
+                <div class="text-xs font-bold uppercase text-blue-400 mb-1">🎯 Objetivo de Aprendizaje</div>
+                <p class="text-slate-200 leading-relaxed text-xs md:text-sm">${mod.objective}</p>
+              </div>
+              <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
+                <div class="text-xs font-bold uppercase text-amber-400 mb-1">💼 Aplicación en tu Rol</div>
+                <p class="text-slate-200 leading-relaxed text-xs md:text-sm">${mod.whyItMatters}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- REPRODUCTOR DE VIDEO CON CONTROL DE VISUALIZACIÓN COMPLETA -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <i data-lucide="video" class="w-5 h-5 text-blue-400"></i>
+                <div>
+                  <h3 class="font-bold text-sm">Cápsula Audiovisual Obligatoria · ${mod.title}</h3>
+                  <p class="text-[11px] text-slate-400">
+                    ${isWatched ? 'Ya completaste este video. Puedes volver a verlo o adelantar libremente.' : 'Debes ver el video completo hasta el final para desbloquear el siguiente módulo.'}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openZoomModal(0)" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                  Conceptos en Modo Zoom
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 aspect-video relative flex items-center justify-center">
+              <video
+                id="moduleVideoPlayer"
+                src="${videoSrc}"
+                controls
+                controlsList="nodownload"
+                class="w-full h-full max-h-[460px] object-contain"
+              >
+                Tu navegador no soporta reproducción de video HTML5.
+              </video>
+            </div>
+          </div>
+
+          <!-- CONCEPTOS CLAVE DEL MÓDULO -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+                  Conceptos Clave del Módulo
+                </h3>
+                <p class="text-xs text-slate-500">Haz clic sobre cualquier concepto para ampliarlo en pantalla completa.</p>
+              </div>
+              <button onclick="openZoomModal(0)" class="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5">
+                <i data-lucide="zoom-in" class="w-4 h-4"></i> Ver en Modo Lupa (${mod.concepts.length})
+              </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              ${mod.concepts.map((c, idx) => `
+                <div onclick="openZoomModal(${idx})" class="concept-card cursor-pointer rounded-xl border border-slate-200 p-4 bg-slate-50/60 hover:bg-white hover:border-blue-400 flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                      <span class="font-extrabold text-slate-900 text-base">${c.term}</span>
+                      <span class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md shrink-0 flex items-center gap-1">
+                        <i data-lucide="zoom-in" class="w-3 h-3"></i> Ampliar
+                      </span>
+                    </div>
+                    <p class="text-xs md:text-sm text-slate-700 leading-relaxed mb-3">${c.def}</p>
+                  </div>
+                  <div class="bg-amber-50/90 border border-amber-200/80 rounded-lg p-3 text-xs text-amber-950">
+                    <strong class="font-bold text-amber-800 block mb-0.5">💡 Analogía / Ejemplo:</strong>
+                    ${c.analogy}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+
+          <!-- CASO INTEGRADOR Y ACTIVIDAD PRÁCTICA -->
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-blue-950 text-white rounded-2xl p-6 shadow-sm border border-blue-900">
+              <div class="text-xs font-bold uppercase tracking-wider text-blue-300 mb-2 flex items-center gap-1.5">
+                <i data-lucide="briefcase" class="w-4 h-4"></i> Caso Integrador Real
+              </div>
+              <p class="text-sm leading-relaxed text-blue-50">${mod.integratorExample}</p>
+            </div>
+
+            <div class="bg-emerald-950 text-white rounded-2xl p-6 shadow-sm border border-emerald-900">
+              <div class="text-xs font-bold uppercase tracking-wider text-emerald-300 mb-2 flex items-center gap-1.5">
+                <i data-lucide="check-square" class="w-4 h-4"></i> Actividad Práctica (5 Minutos)
+              </div>
+              <p class="text-sm leading-relaxed text-emerald-50">${mod.activity}</p>
+            </div>
+          </div>
+
+          <!-- APUNTES PERSONALES DEL PARTICIPANTE -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
+              <i data-lucide="pen-tool" class="w-4 h-4 text-emerald-600"></i>
+              Tu Glosario Personal · ${mod.id}
+            </h4>
+            <p class="text-xs text-slate-500 mb-3">Anota con tus propias palabras las definiciones clave de este módulo: <strong>${mod.concepts.map(c => c.term).join(" · ")}</strong></p>
+            <textarea
+              rows="2"
+              oninput="savePersonalNote('${mod.id}', this.value)"
+              placeholder="Escribe tus apuntes personales de este módulo (se guardan en tu cuenta)..."
+              class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >${currentUser.personalNotes?.[mod.id] || ""}</textarea>
+          </div>
+
+          <!-- CONTINUAR AL SIGUIENTE MÓDULO O EVALUACIÓN -->
+          <div class="bg-slate-900 text-white rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="text-xs font-bold uppercase tracking-wider text-amber-400">Próximo Paso</div>
+              <p class="text-sm text-slate-200">${mod.prevNext.outro}</p>
+            </div>
+            <div id="nextStepActionContainer" class="flex items-center gap-3 shrink-0">
+              ${renderNextStepButtonHTML(block, modIndex, isWatched)}
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      setupVideoEnforcement(mod.id);
+      lucide.createIcons();
+    }
+
+    function renderNextStepButtonHTML(block, modIndex, isWatched) {
+      if (modIndex < block.modules.length - 1) {
+        const nextModId = block.modules[modIndex + 1].id;
+        if (isWatched) {
+          return `
+            <button onclick="selectModule(${block.id}, '${nextModId}')" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm flex items-center gap-2 shadow-lg transition">
+              Continuar a ${nextModId} <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          `;
+        } else {
+          return `
+            <button disabled class="px-5 py-3 rounded-xl bg-slate-800 text-slate-400 font-bold text-sm flex items-center gap-2 border border-slate-700 cursor-not-allowed">
+              <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i> Termina el video para ir a ${nextModId}
+            </button>
+          `;
+        }
+      } else {
+        if (isWatched) {
+          return `
+            <button onclick="startBlockQuiz(${block.id})" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm flex items-center gap-2 shadow-lg transition">
+              Rendir Evaluación del ${block.code} <i data-lucide="award" class="w-4 h-4"></i>
+            </button>
+          `;
+        } else {
+          return `
+            <button disabled class="px-5 py-3 rounded-xl bg-slate-800 text-slate-400 font-bold text-sm flex items-center gap-2 border border-slate-700 cursor-not-allowed">
+              <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i> Termina el video para rendir la Evaluación
+            </button>
+          `;
+        }
+      }
+    }
+
+    function setupVideoEnforcement(moduleId) {
+      const video = document.getElementById("moduleVideoPlayer");
+      if (!video) return;
+
+      state.videoMaxTimeWatched = 0;
+
+      video.addEventListener("timeupdate", () => {
+        if (!video.seeking && video.currentTime > state.videoMaxTimeWatched) {
+          state.videoMaxTimeWatched = video.currentTime;
+        }
+      });
+
+      video.addEventListener("seeking", () => {
+        const isWatchedNow = currentUser.watchedVideos.includes(moduleId) || currentUser.role === "admin";
+        if (!isWatchedNow && video.currentTime > state.videoMaxTimeWatched + 2) {
+          video.currentTime = state.videoMaxTimeWatched;
+        }
+      });
+
+      video.addEventListener("ended", async () => {
+        if (!currentUser.watchedVideos.includes(moduleId)) {
+          currentUser.watchedVideos.push(moduleId);
+          await saveUserToDB(currentUser);
+          updateGlobalProgressUI();
+          renderSidebar();
+
+          const block = COURSE_BLOCKS.find(b => b.id === state.currentView.blockId);
+          const modIndex = block.modules.findIndex(m => m.id === moduleId);
+          const nextContainer = document.getElementById("nextStepActionContainer");
+          if (nextContainer) {
+            nextContainer.innerHTML = renderNextStepButtonHTML(block, modIndex, true);
+          }
+          const badge = document.getElementById("videoStatusBadge");
+          if (badge) {
+            badge.className = "text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-500 text-slate-950";
+            badge.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> <span>¡Video Completado! Siguiente módulo desbloqueado</span>`;
+          }
+          lucide.createIcons();
+        }
+      });
+    }
+
+    // ============================================================================
+    // EVALUACIONES DE BLOQUE CON REGISTRO DE INTENTOS Y NOTA MÁXIMA
+    // ============================================================================
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startBlockQuiz(blockId) {
+      if (!areAllBlockVideosWatched(blockId)) {
+        alert("Debes completar los videos de todos los módulos de este bloque antes de rendir la evaluación.");
+        return;
+      }
+
+      const bank = BLOCK_QUESTION_BANKS[blockId];
+      const picked10 = shuffleArray(bank).slice(0, 10).map(q => ({
+        ...q,
+        shuffledOptions: shuffleArray(q.options)
+      }));
+
+      state.currentView = { type: "quiz", blockId };
+      state.activeQuiz = {
+        blockId,
+        questions: picked10,
+        answers: {},
+        submitted: false,
+        score: 0
+      };
+
+      renderSidebar();
+      renderMainContent();
+      document.getElementById("mainContent").scrollTop = 0;
+    }
+
+    function selectQuizOption(qIndex, optionValue) {
+      if (state.activeQuiz.submitted) return;
+      state.activeQuiz.answers[qIndex] = optionValue;
+      renderMainContent();
+    }
+
+    async function submitBlockQuiz() {
+      const quiz = state.activeQuiz;
+      const answeredCount = Object.keys(quiz.answers).length;
+      if (answeredCount < 10) {
+        alert(`Por favor responde las 10 preguntas antes de enviar la evaluación (${answeredCount}/10 respondidas).`);
+        return;
+      }
+
+      let correct = 0;
+      quiz.questions.forEach((q, idx) => {
+        if (quiz.answers[idx] === q.correctAnswer) correct++;
+      });
+
+      quiz.submitted = true;
+      quiz.score = correct;
+
+      if (!currentUser.blockTestStats) currentUser.blockTestStats = {};
+      const prevStat = currentUser.blockTestStats[quiz.blockId] || { attempts: 0, bestScore: 0, passed: false };
+
+      const newAttempts = prevStat.attempts + 1;
+      const newBestScore = Math.max(prevStat.bestScore, correct);
+      const isNowPassed = prevStat.passed || correct >= 8;
+
+      currentUser.blockTestStats[quiz.blockId] = {
+        attempts: newAttempts,
+        bestScore: newBestScore,
+        lastScore: correct,
+        passed: isNowPassed,
+        lastDate: new Date().toLocaleString("es-CL")
+      };
+
+      if (correct >= 8) {
+        const nextBlockId = quiz.blockId + 1;
+        if (!currentUser.unlockedBlocks) currentUser.unlockedBlocks = [0];
+        if (nextBlockId < COURSE_BLOCKS.length && !currentUser.unlockedBlocks.includes(nextBlockId)) {
+          currentUser.unlockedBlocks.push(nextBlockId);
+        }
+      }
+
+      await saveUserToDB(currentUser);
+      renderSidebar();
+      renderMainContent();
+      document.getElementById("mainContent").scrollTop = 0;
+    }
+
+    function renderQuizView(main) {
+      const quiz = state.activeQuiz;
+      const block = COURSE_BLOCKS.find(b => b.id === quiz.blockId);
+      const passed = quiz.score >= 8;
+      const userStat = currentUser.blockTestStats?.[block.id];
+
+      main.innerHTML = `
+        <div class="max-w-4xl mx-auto space-y-6 pb-12">
+          <!-- ENCABEZADO EJECUTIVO DE LA EVALUACIÓN -->
+          <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full mb-2">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> Evaluación de Cierre · 10 Preguntas
+              </div>
+              <h2 class="text-2xl font-extrabold">Evaluación · ${block.code}: ${block.title}</h2>
+              <p class="text-xs md:text-sm text-slate-300 mt-1">
+                Para aprobar este bloque y desbloquear el siguiente necesitas obtener un <strong class="text-emerald-400">mínimo de 80% (8 de 10 respuestas correctas)</strong>.
+              </p>
+            </div>
+            ${
+              userStat
+                ? `<div class="bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-700 text-xs">
+                    <div class="text-slate-400">Tus intentos en este bloque: <strong class="text-white">${userStat.attempts}</strong></div>
+                    <div class="text-slate-400 mt-0.5">Mejor calificación: <strong class="text-emerald-400">${userStat.bestScore * 10}% (${userStat.bestScore}/10)</strong></div>
+                  </div>`
+                : ''
+            }
+          </div>
+
+          <!-- RESULTADO TRAS ENVIAR -->
+          ${
+            quiz.submitted
+              ? `
+                <div class="p-6 rounded-2xl border-2 shadow-md ${
+                  passed
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950'
+                    : 'bg-rose-50 border-rose-500 text-rose-950'
+                }">
+                  <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                      <div class="w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-extrabold ${
+                        passed ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                      }">
+                        <span class="text-xl leading-none">${quiz.score * 10}%</span>
+                        <span class="text-[11px] font-semibold opacity-90 mt-0.5">${quiz.score}/10</span>
+                      </div>
+                      <div>
+                        <h3 class="text-xl font-extrabold">
+                          ${
+                            passed
+                              ? `¡Evaluación Aprobada! Obtuviste ${quiz.score} de 10 (${quiz.score * 10}%)`
+                              : `Puntaje obtenido: ${quiz.score} de 10 (${quiz.score * 10}%) · Se requiere 80% (8/10)`
+                          }
+                        </h3>
+                        <p class="text-sm mt-1">
+                          ${
+                            passed
+                              ? block.id + 1 < COURSE_BLOCKS.length
+                                ? `Has desbloqueado el <strong>${COURSE_BLOCKS[block.id + 1].code}: ${COURSE_BLOCKS[block.id + 1].title}</strong>.`
+                                : `¡Felicitaciones! Has aprobado satisfactoriamente todos los bloques del programa.`
+                              : `Revisa la retroalimentación de cada pregunta a continuación y realiza un nuevo intento para alcanzar el 80%.`
+                          }
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="flex gap-3 shrink-0">
+                      ${
+                        !passed
+                          ? `<button onclick="startBlockQuiz(${block.id})" class="px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow">
+                              <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Realizar Nuevo Intento
+                            </button>`
+                          : block.id + 1 < COURSE_BLOCKS.length
+                            ? `<button onclick="selectModule(${block.id + 1}, '${COURSE_BLOCKS[block.id + 1].modules[0].id}')" class="px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 shadow">
+                                Avanzar al ${COURSE_BLOCKS[block.id + 1].code} <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                              </button>`
+                            : ''
+                      }
+                    </div>
+                  </div>
+                </div>
+              `
+              : ''
+          }
+
+          <!-- PREGUNTAS -->
+          <div class="space-y-4">
+            ${quiz.questions.map((q, qIdx) => {
+              const userAns = quiz.answers[qIdx];
+              const isCorrect = userAns === q.correctAnswer;
+
+              return `
+                <div class="bg-white rounded-2xl shadow-sm border ${
+                  quiz.submitted
+                    ? isCorrect
+                      ? 'border-emerald-400'
+                      : 'border-rose-400'
+                    : 'border-slate-200'
+                } p-6">
+                  <div class="flex items-center justify-between gap-2 mb-2">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
+                      Pregunta ${qIdx + 1} de 10 · ${q.moduleRef}
+                    </span>
+                    ${
+                      quiz.submitted
+                        ? isCorrect
+                          ? `<span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md">✓ Correcta</span>`
+                          : `<span class="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-1 rounded-md">✗ Incorrecta</span>`
+                        : ''
+                    }
+                  </div>
+
+                  <h4 class="font-bold text-slate-900 text-base mb-4 leading-snug">${q.question}</h4>
+
+                  <div class="space-y-2.5">
+                    ${q.shuffledOptions.map((opt, oIdx) => {
+                      const isSelected = userAns === opt;
+                      let optionStyle = "border-slate-200 hover:border-blue-400 bg-slate-50/70 text-slate-800";
+
+                      if (!quiz.submitted && isSelected) {
+                        optionStyle = "border-blue-600 bg-blue-50 text-blue-950 font-semibold ring-2 ring-blue-500/20";
+                      } else if (quiz.submitted) {
+                        if (opt === q.correctAnswer) {
+                          optionStyle = "border-emerald-500 bg-emerald-50 text-emerald-950 font-bold";
+                        } else if (isSelected && opt !== q.correctAnswer) {
+                          optionStyle = "border-rose-500 bg-rose-50 text-rose-900 line-through";
+                        }
+                      }
+
+                      return `
+                        <button
+                          onclick="selectQuizOption(${qIdx}, ${JSON.stringify(opt).replace(/"/g, '&quot;')})"
+                          class="w-full text-left p-3.5 rounded-xl border text-xs md:text-sm transition flex items-start gap-3 ${optionStyle}"
+                        >
+                          <span class="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                            ${String.fromCharCode(65 + oIdx)}
+                          </span>
+                          <span class="leading-relaxed">${opt}</span>
+                        </button>
+                      `;
+                    }).join("")}
+                  </div>
+
+                  ${
+                    quiz.submitted
+                      ? `<div class="mt-4 p-3.5 rounded-xl bg-slate-100 text-xs text-slate-700 border border-slate-200">
+                          <strong class="text-slate-900">Retroalimentación:</strong> ${q.explanation}
+                        </div>`
+                      : ''
+                  }
+                </div>
+              `;
+            }).join("")}
+          </div>
+
+          <!-- ENVIAR EVALUACIÓN -->
+          ${
+            !quiz.submitted
+              ? `<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                  <span class="text-xs md:text-sm text-slate-600 font-medium">
+                    Progreso: <strong>${Object.keys(quiz.answers).length} de 10 respondidas</strong>
+                  </span>
+                  <button onclick="submitBlockQuiz()" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-lg transition flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Enviar Evaluación
+                  </button>
+                </div>`
+              : ''
+          }
+        </div>
+      `;
+
+      lucide.createIcons();
+    }
+
+    // ============================================================================
+    // FUNCIONES AUXILIARES (ZOOM, NOTAS PERSONALES Y CONFIGURACIÓN ADMIN)
+    // ============================================================================
+    function openZoomModal(index) {
+      state.zoomContext.index = index;
+      updateZoomModalContent();
+      const modal = document.getElementById("zoomModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeZoomModal() {
+      const modal = document.getElementById("zoomModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function stepZoom(delta) {
+      const list = state.zoomContext.concepts;
+      let next = state.zoomContext.index + delta;
+      if (next < 0) next = list.length - 1;
+      if (next >= list.length) next = 0;
+      state.zoomContext.index = next;
+      updateZoomModalContent();
+    }
+
+    function updateZoomModalContent() {
+      const item = state.zoomContext.concepts[state.zoomContext.index];
+      document.getElementById("zoomTermTitle").textContent = item.term;
+      document.getElementById("zoomTermDef").textContent = item.def;
+      document.getElementById("zoomTermAnalogy").textContent = item.analogy;
+      document.getElementById("zoomCounter").textContent = `${state.zoomContext.index + 1} de ${state.zoomContext.concepts.length}`;
+    }
+
+    async function savePersonalNote(moduleId, text) {
+      if (!currentUser) return;
+      if (!currentUser.personalNotes) currentUser.personalNotes = {};
+      currentUser.personalNotes[moduleId] = text;
+      await saveUserToDB(currentUser);
+    }
+
+    function openAdminConfigModal() {
+      if (currentUser?.role !== "admin") return;
+      const container = document.getElementById("videoLinksContainer");
+      let html = "";
+      COURSE_BLOCKS.forEach(b => {
+        b.modules.forEach(m => {
+          const val = state.customVideos[m.id] || "";
+          html += `
+            <div class="flex flex-col md:flex-row md:items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <label class="text-xs font-bold text-slate-800 md:w-64 shrink-0">${m.title}</label>
+              <input
+                type="text"
+                data-mod-video="${m.id}"
+                value="${val}"
+                placeholder="videos/${m.id}.mp4 (o pega URL de Drive / Servidor)"
+                class="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          `;
+        });
+      });
+      container.innerHTML = html;
+      const modal = document.getElementById("adminConfigModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      lucide.createIcons();
+    }
+
+    function closeAdminConfigModal() {
+      const modal = document.getElementById("adminConfigModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    async function saveAdminConfig() {
+      document.querySelectorAll("[data-mod-video]").forEach(input => {
+        const modId = input.getAttribute("data-mod-video");
+        state.customVideos[modId] = input.value.trim();
+      });
+      localStorage.setItem("re_customVideos", JSON.stringify(state.customVideos));
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from("elearning_users").upsert({
+            email: "__system_config__",
+            data: { role: "admin", customVideos: state.customVideos },
+            updated_at: new Date().toISOString()
+          });
+        } catch (e) {}
+      }
+
+      closeAdminConfigModal();
+      renderAdminDashboardTab();
+    }
+
+    function updateGlobalProgressUI() {
+      if (!currentUser) return;
+      const totalMods = ALL_MODULES_FLAT.length;
+      const watchedCount = currentUser.watchedVideos?.length || 0;
+      const pct = Math.round((watchedCount / totalMods) * 100);
+      document.getElementById("globalProgressText").textContent = `${pct}%`;
+      document.getElementById("globalProgressBar").style.width = `${pct}%`;
+    }
+
+    // Inicialización al abrir la plataforma
+    window.addEventListener("DOMContentLoaded", async () => {
+      initSupabase();
+      await syncAllUsersFromCloud();
+
+      // Asegurar que la cuenta maestra de admin exista también en Supabase
+      const db = getUsersDB();
+      await saveUserToDB(db[DEFAULT_ADMIN_ACCOUNT.email]);
+
+      const savedEmail = localStorage.getItem("re_active_session_email");
+      if (savedEmail && db[savedEmail]) {
+        loginSuccess(db[savedEmail]);
+        return;
+      }
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

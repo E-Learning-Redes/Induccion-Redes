@@ -24,11 +24,11 @@
 <body class="bg-slate-100 text-slate-800 flex flex-col overflow-hidden">
 
   <!-- ======================================================================== -->
-  <!-- PANTALLA DE LOGIN Y REGISTRO OBLIGATORIO (ADAPTADA A MÓVIL Y ESCRITORIO) -->
+  <!-- PANTALLA DE LOGIN Y REGISTRO OBLIGATORIO -->
   <!-- ======================================================================== -->
   <div id="authScreen" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-50 p-4 overflow-y-auto">
     <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 text-white my-auto">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center justify-between mb-6 gap-2">
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-extrabold text-lg sm:text-xl shadow-lg shadow-blue-600/30 shrink-0">
             RE
@@ -38,8 +38,8 @@
             <p class="text-xs text-slate-400">Plataforma de Inducción & Certificación</p>
           </div>
         </div>
-        <span class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Activo
+        <span id="authCloudBadge" class="text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Conectando...
         </span>
       </div>
 
@@ -95,37 +95,36 @@
 
       <div class="mt-6 pt-4 border-t border-slate-800 text-center">
         <p class="text-[11px] text-slate-400">
-          Tu avance se guarda automáticamente en la nube. Puedes continuar desde tu computador o teléfono en cualquier momento.
+          Inicia sesión con el mismo correo o usuario en tu computador y en tu teléfono para sincronizar tu avance en vivo.
         </p>
       </div>
     </div>
   </div>
 
   <!-- ======================================================================== -->
-  <!-- BARRA SUPERIOR EJECUTIVA (CON BOTÓN DE MENÚ MÓVIL) -->
+  <!-- BARRA SUPERIOR EJECUTIVA (CON SINCRONIZACIÓN EN VIVO Y MENÚ MÓVIL) -->
   <!-- ======================================================================== -->
-  <header class="bg-slate-900 text-white h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between border-b border-slate-800 shrink-0 z-30">
+  <header class="bg-slate-900 text-white h-14 sm:h-16 px-2.5 sm:px-6 flex items-center justify-between border-b border-slate-800 shrink-0 z-30">
     <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Botón abrir lista de módulos en teléfono -->
-      <button onclick="toggleMobileSidebar()" id="mobileMenuBtn" class="lg:hidden p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5">
-        <i data-lucide="menu" class="w-5 h-5 text-blue-400"></i>
-        <span class="text-xs font-bold pr-0.5">Módulos</span>
+      <button onclick="toggleMobileSidebar()" id="mobileMenuBtn" class="lg:hidden px-2.5 py-2 rounded-xl bg-blue-600 text-white font-bold flex items-center gap-1.5 shadow">
+        <i data-lucide="list" class="w-4 h-4"></i>
+        <span class="text-xs">Módulos</span>
       </button>
 
       <div class="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 items-center justify-center font-extrabold text-base sm:text-lg shadow-lg shadow-blue-600/30 select-none shrink-0">
         RE
       </div>
-      <div class="truncate">
+      <div class="truncate hidden xs:block">
         <h1 class="font-bold text-xs sm:text-base tracking-tight flex items-center gap-2 truncate">
           <span>Redes Enterprise</span>
           <span class="hidden md:inline-block text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2.5 py-0.5 rounded-full">De Cero a Consultor</span>
         </h1>
-        <p class="text-[11px] text-slate-400 hidden md:block">26 módulos · Avance sincronizado en la nube</p>
+        <p class="text-[11px] text-slate-400 hidden md:block">26 módulos · Sincronización PC & Móvil</p>
       </div>
     </div>
 
     <!-- PESTAÑAS DE NAVEGACIÓN PRINCIPAL -->
-    <div class="flex items-center gap-1.5 sm:gap-3">
+    <div class="flex items-center gap-1.5 sm:gap-2.5">
       <nav class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700">
         <button onclick="switchMainTab('course')" id="tabBtnCourse" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition bg-blue-600 text-white shadow">
           <i data-lucide="graduation-cap" class="w-4 h-4 shrink-0"></i>
@@ -139,14 +138,13 @@
           <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
           <span class="hidden sm:inline">Glosario</span>
         </button>
-        <!-- PESTAÑA EXCLUSIVA DE ADMINISTRADOR -->
         <button onclick="switchMainTab('admin')" id="tabBtnAdmin" class="hidden px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1.5 transition text-amber-300 hover:text-white">
           <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
           <span class="hidden sm:inline">Admin</span>
         </button>
       </nav>
 
-      <!-- Barra de progreso compacta -->
+      <!-- Barra de progreso compacta escritorio -->
       <div class="hidden xl:flex items-center gap-3 bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-slate-700">
         <div class="text-xs">
           <span class="text-slate-400">Avance:</span>
@@ -157,11 +155,14 @@
         </div>
       </div>
 
-      <!-- Perfil del usuario activo y Cerrar Sesión -->
-      <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-800/90 pl-2 sm:pl-3 pr-1.5 py-1 rounded-xl border border-slate-700">
-        <div class="text-right hidden md:block">
-          <div id="currentUserNameUI" class="text-xs font-bold text-white leading-none truncate max-w-[120px]">Usuario</div>
-          <div id="currentUserRoleUI" class="text-[10px] text-emerald-400 mt-0.5">Sincronizado ✓</div>
+      <!-- Botón de Sincronización Instantánea + Perfil -->
+      <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-800/90 pl-2 sm:pl-3 pr-1.5 py-1 rounded-xl border border-slate-700">
+        <button onclick="forceManualSync()" title="Sincronizar avance con la nube ahora" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1">
+          <i id="syncSpinnerIcon" data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400"></i>
+        </button>
+        <div class="text-right hidden md:block pr-1">
+          <div id="currentUserNameUI" class="text-xs font-bold text-white leading-none truncate max-w-[115px]">Usuario</div>
+          <div id="headerSyncStatusUI" class="text-[10px] text-emerald-400 mt-0.5">Sincronizado ✓</div>
         </div>
         <button onclick="handleLogout()" title="Cerrar Sesión" class="p-1.5 rounded-lg bg-slate-700/70 hover:bg-rose-600 text-slate-300 hover:text-white transition">
           <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -170,12 +171,13 @@
     </div>
   </header>
 
-  <!-- SUB-BARRA DE AVANCE EN TELÉFONOS -->
-  <div class="xl:hidden bg-slate-900/95 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-300 shrink-0">
-    <span id="mobileCurrentModuleLabel" class="font-semibold text-blue-300 truncate pr-2">M1. Cómo viaja un dato</span>
+  <!-- SUB-BARRA MÓVIL DE ESTADO Y AVANCE -->
+  <div class="xl:hidden bg-slate-900/95 border-b border-slate-800 px-3.5 py-1.5 flex items-center justify-between text-[11px] text-slate-300 shrink-0 gap-2">
+    <span id="mobileCurrentModuleLabel" class="font-semibold text-blue-300 truncate">M1. Cómo viaja un dato</span>
     <div class="flex items-center gap-2 shrink-0">
-      <span>Avance: <strong id="mobileProgressText" class="text-emerald-400">0%</strong></span>
-      <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+      <span id="mobileSyncDot" class="text-[10px] text-emerald-400 font-semibold">● Nube OK</span>
+      <span><strong id="mobileProgressText" class="text-white">0%</strong></span>
+      <div class="w-14 h-1.5 bg-slate-700 rounded-full overflow-hidden">
         <div id="mobileProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
       </div>
     </div>
@@ -187,16 +189,16 @@
     <!-- FONDO OSCURO PARA CERRAR EL MENÚ EN MÓVILES -->
     <div id="mobileSidebarBackdrop" onclick="closeMobileSidebar()" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-30 hidden lg:hidden"></div>
 
-    <!-- SIDEBAR DE MÓDULOS Y BLOQUES (DRAWER EN MÓVIL, FIJO EN ESCRITORIO) -->
-    <aside id="courseSidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-80 max-w-[85vw] bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+    <!-- SIDEBAR DE MÓDULOS Y BLOQUES -->
+    <aside id="courseSidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-80 max-w-[86vw] bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
       <div class="p-4 border-b border-slate-800 bg-slate-950/40 flex items-start justify-between gap-2">
         <div>
-          <div class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Progreso Secuencial</div>
+          <div class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Ruta de Módulos</div>
           <div class="text-xs text-slate-400 leading-relaxed">
             Completa el <strong class="text-white">100% del video</strong> de cada módulo para habilitar el siguiente y aprueba cada bloque con <strong class="text-white">80% (8/10)</strong>.
           </div>
         </div>
-        <button onclick="closeMobileSidebar()" class="lg:hidden p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white shrink-0">
+        <button onclick="closeMobileSidebar()" class="lg:hidden p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white shrink-0">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -208,7 +210,7 @@
 
   </div>
 
-  <!-- MODAL: MODO ZOOM EDUCATIVO (ADAPTADO A MÓVIL) -->
+  <!-- MODAL: MODO ZOOM EDUCATIVO -->
   <div id="zoomModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90dvh] overflow-y-auto p-5 sm:p-8 shadow-2xl border border-slate-200 relative">
       <button onclick="closeZoomModal()" class="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
@@ -245,7 +247,7 @@
     </div>
   </div>
 
-  <!-- MODAL: CONFIGURACIÓN DE VIDEOS (SOLO ADMIN - GUARDADO EN SUPABASE) -->
+  <!-- MODAL: CONFIGURACIÓN DE VIDEOS Y CREDENCIALES SUPABASE (SOLO ADMIN) -->
   <div id="adminConfigModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
     <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90dvh] flex flex-col shadow-2xl border border-slate-200">
       <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white rounded-t-2xl">
@@ -255,7 +257,7 @@
             Enlaces de Video en Supabase (Permanentes)
           </h3>
           <p class="text-xs text-slate-400 mt-0.5">
-            Estos links quedan guardados directamente en la base de datos de Supabase. Aunque actualices el archivo HTML, nunca se deslinkean.
+            Estos links quedan guardados directamente en la tabla <code class="text-blue-300">elearning_users</code> de Supabase para todos los dispositivos.
           </p>
         </div>
         <button onclick="closeAdminConfigModal()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 shrink-0">
@@ -263,17 +265,13 @@
         </button>
       </div>
 
-      <div class="p-4 sm:p-6 overflow-y-auto space-y-3 flex-1">
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 text-xs text-blue-950">
-          <strong>💡 Ruta automática en tu Storage de Supabase:</strong> Si subes tus videos a un bucket público llamado <code class="bg-white px-1.5 py-0.5 rounded font-mono">videos</code> en tu Supabase con los nombres <code class="bg-white px-1.5 py-0.5 rounded font-mono">M1.mp4</code>, <code class="bg-white px-1.5 py-0.5 rounded font-mono">M2.mp4</code>, etc., la plataforma los detectará automáticamente sin necesidad de pegar links uno por uno.
-        </div>
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+        <div id="adminSupaDiagnosticBox" class="p-3.5 rounded-xl border text-xs"></div>
         <div id="videoLinksContainer" class="space-y-2.5"></div>
       </div>
 
       <div class="p-4 border-t border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-2 rounded-b-2xl">
-        <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
-          <i data-lucide="cloud" class="w-4 h-4"></i> Guardado permanente en Supabase Cloud
-        </span>
+        <span class="text-xs text-slate-500">Se sincroniza automáticamente con PC y Teléfonos.</span>
         <div class="flex gap-2">
           <button onclick="closeAdminConfigModal()" class="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs sm:text-sm font-semibold">Cancelar</button>
           <button id="btnSaveVideoConfig" onclick="saveAdminConfig()" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow">Guardar en Supabase</button>
@@ -284,12 +282,11 @@
 
   <script>
     // ============================================================================
-    // CREDENCIALES FIJAS DE SUPABASE (SINCRONIZACIÓN PERMANENTE EN LA NUBE)
+    // CREDENCIALES FIJAS DE SUPABASE
     // ============================================================================
     const SUPABASE_PROJECT_URL = "https://jdwonyunvlqbgpbdisyn.supabase.co";
     const SUPABASE_ANON_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impkd29ueXVudmxxYmdwYmRpc3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzk3NTgsImV4cCI6MjEwODYxNTc1OH0.QdXdCxtNKJUCd0iml821YRoazOmL3B2yfQQMgZ0ChRM";
 
-    // Cuenta maestra de Administrador
     const DEFAULT_ADMIN_ACCOUNT = {
       username: "admin",
       email: "admin@redes.cl",
@@ -303,10 +300,10 @@
       blockTestStats: {},
       personalNotes: {},
       videoProgress: {},
-      lastPosition: { blockId: 0, moduleId: "M1" }
+      lastPosition: { blockId: 0, moduleId: "M1" },
+      updatedAtMs: 0
     };
 
-    // Documentos oficiales descargables
     const COURSE_DOCUMENTS = [
       {
         id: "doc-induccion",
@@ -1002,7 +999,7 @@
     });
 
     // ============================================================================
-    // MOTOR INTERNO DE EVALUACIONES (25 PREGUNTAS POR BLOQUE, ENTREGA 10)
+    // MOTOR DE BANCOS DE 25 PREGUNTAS POR BLOQUE
     // ============================================================================
     function buildQuestionBankForBlock(block) {
       const bank = [];
@@ -1081,15 +1078,113 @@
     });
 
     // ============================================================================
-    // CONEXIÓN DIRECTA CON SUPABASE Y SINCRONIZACIÓN DE USUARIOS + VIDEOS
+    // SINCRONIZACIÓN INTELIGENTE SUPABASE + MERGE QUE NUNCA RETROCEDE EL AVANCE
     // ============================================================================
     let supabaseClient = null;
+    let cloudSyncHealthy = false;
+    let lastCloudErrorMsg = "";
+
     function initSupabase() {
       if (window.supabase) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_PUBLIC_KEY);
         } catch (e) {
           supabaseClient = null;
+        }
+      }
+    }
+
+    // Une los datos de dos dispositivos conservando SIEMPRE el mayor avance
+    function mergeUserProfiles(localUser, cloudUser) {
+      if (!localUser) return cloudUser;
+      if (!cloudUser) return localUser;
+
+      const watchedSet = new Set([
+        ...(localUser.watchedVideos || []),
+        ...(cloudUser.watchedVideos || [])
+      ]);
+
+      const unlockedSet = new Set([
+        0,
+        ...(localUser.unlockedBlocks || [0]),
+        ...(cloudUser.unlockedBlocks || [0])
+      ]);
+
+      const mergedStats = { ...(localUser.blockTestStats || {}) };
+      Object.entries(cloudUser.blockTestStats || {}).forEach(([bId, cStat]) => {
+        const lStat = mergedStats[bId];
+        if (!lStat) {
+          mergedStats[bId] = cStat;
+        } else {
+          mergedStats[bId] = {
+            attempts: Math.max(lStat.attempts || 0, cStat.attempts || 0),
+            bestScore: Math.max(lStat.bestScore || 0, cStat.bestScore || 0),
+            lastScore: (cStat.updatedAtMs || 0) >= (lStat.updatedAtMs || 0) ? cStat.lastScore : lStat.lastScore,
+            passed: Boolean(lStat.passed || cStat.passed),
+            lastDate: cStat.lastDate || lStat.lastDate
+          };
+        }
+      });
+
+      const mergedProgress = { ...(localUser.videoProgress || {}) };
+      Object.entries(cloudUser.videoProgress || {}).forEach(([mId, sec]) => {
+        mergedProgress[mId] = Math.max(mergedProgress[mId] || 0, sec || 0);
+      });
+
+      const mergedNotes = {
+        ...(localUser.personalNotes || {}),
+        ...(cloudUser.personalNotes || {})
+      };
+
+      const newerIsCloud = (cloudUser.updatedAtMs || 0) >= (localUser.updatedAtMs || 0);
+
+      return {
+        ...localUser,
+        ...cloudUser,
+        watchedVideos: Array.from(watchedSet),
+        unlockedBlocks: Array.from(unlockedSet).sort((a, b) => a - b),
+        blockTestStats: mergedStats,
+        videoProgress: mergedProgress,
+        personalNotes: mergedNotes,
+        lastPosition: newerIsCloud
+          ? (cloudUser.lastPosition || localUser.lastPosition || { blockId: 0, moduleId: "M1" })
+          : (localUser.lastPosition || cloudUser.lastPosition || { blockId: 0, moduleId: "M1" }),
+        updatedAtMs: Math.max(localUser.updatedAtMs || 0, cloudUser.updatedAtMs || 0)
+      };
+    }
+
+    function updateCloudBadgesUI(ok, detailMsg) {
+      cloudSyncHealthy = ok;
+      lastCloudErrorMsg = detailMsg || "";
+      const authBadge = document.getElementById("authCloudBadge");
+      const headerStatus = document.getElementById("headerSyncStatusUI");
+      const mobileDot = document.getElementById("mobileSyncDot");
+
+      if (ok) {
+        if (authBadge) {
+          authBadge.className = "text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0";
+          authBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Cloud Sincronizado`;
+        }
+        if (headerStatus) {
+          headerStatus.className = "text-[10px] text-emerald-400 mt-0.5";
+          headerStatus.textContent = "Sincronizado ✓";
+        }
+        if (mobileDot) {
+          mobileDot.className = "text-[10px] text-emerald-400 font-semibold";
+          mobileDot.textContent = "● Nube OK";
+        }
+      } else {
+        if (authBadge) {
+          authBadge.className = "text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0";
+          authBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> Modo Local`;
+        }
+        if (headerStatus) {
+          headerStatus.className = "text-[10px] text-amber-400 mt-0.5";
+          headerStatus.textContent = "Revisar tabla SQL";
+        }
+        if (mobileDot) {
+          mobileDot.className = "text-[10px] text-amber-400 font-semibold";
+          mobileDot.textContent = "● Local";
         }
       }
     }
@@ -1106,40 +1201,106 @@
 
     async function saveUserToDB(userObj) {
       if (!userObj || !userObj.email) return;
+      userObj.updatedAtMs = Date.now();
+      const key = userObj.email.toLowerCase();
       const db = getUsersDB();
-      db[userObj.email.toLowerCase()] = userObj;
-      localStorage.setItem("re_users_db", JSON.stringify(db));
 
+      // Primero traemos lo que haya en la nube para este usuario para no pisar avances de otro dispositivo
       if (supabaseClient) {
         try {
-          await supabaseClient.from("elearning_users").upsert({
-            email: userObj.email.toLowerCase(),
+          const { data: existingRow, error: fetchErr } = await supabaseClient
+            .from("elearning_users")
+            .select("data")
+            .eq("email", key)
+            .maybeSingle();
+
+          if (!fetchErr && existingRow?.data) {
+            userObj = mergeUserProfiles( existingRow.data, userObj );
+          }
+
+          const { error: upsertErr } = await supabaseClient.from("elearning_users").upsert({
+            email: key,
             data: userObj,
             updated_at: new Date().toISOString()
           });
-        } catch (e) {}
+
+          if (upsertErr) {
+            updateCloudBadgesUI(false, upsertErr.message);
+          } else {
+            updateCloudBadgesUI(true, "");
+          }
+        } catch (e) {
+          updateCloudBadgesUI(false, e.message);
+        }
+      }
+
+      db[key] = userObj;
+      localStorage.setItem("re_users_db", JSON.stringify(db));
+      if (currentUser && currentUser.email.toLowerCase() === key) {
+        currentUser = userObj;
       }
     }
 
-    // Fusión inteligente para que jamás se pierdan enlaces de videos ni avances de usuarios
     async function syncAllUsersFromCloud() {
       if (!supabaseClient) return;
       try {
         const { data, error } = await supabaseClient.from("elearning_users").select("*");
-        if (!error && data && Array.isArray(data)) {
+        if (error) {
+          updateCloudBadgesUI(false, error.message);
+          return;
+        }
+        updateCloudBadgesUI(true, "");
+        if (data && Array.isArray(data)) {
           const db = getUsersDB();
           data.forEach(row => {
             if (row.email === "__system_config__" && row.data?.customVideos) {
-              // Combinar links de la nube con los locales sin borrar ninguno existente
               state.customVideos = { ...state.customVideos, ...row.data.customVideos };
               localStorage.setItem("re_customVideos", JSON.stringify(state.customVideos));
             } else if (row.email && row.data) {
-              db[row.email.toLowerCase()] = row.data;
+              const k = row.email.toLowerCase();
+              db[k] = mergeUserProfiles(db[k], row.data);
             }
           });
           localStorage.setItem("re_users_db", JSON.stringify(db));
+
+          // Si hay un usuario logueado en este dispositivo, actualizar su estado en pantalla
+          if (currentUser) {
+            const k = currentUser.email.toLowerCase();
+            if (db[k]) {
+              const prevWatchedLen = currentUser.watchedVideos?.length || 0;
+              const prevUnlockedLen = currentUser.unlockedBlocks?.length || 0;
+              currentUser = db[k];
+              updateGlobalProgressUI();
+              if (
+                state.activeTab === "course" &&
+                ((currentUser.watchedVideos?.length || 0) !== prevWatchedLen ||
+                  (currentUser.unlockedBlocks?.length || 0) !== prevUnlockedLen)
+              ) {
+                renderSidebar();
+                if (state.currentView.type === "module") renderMainContent();
+              }
+            }
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        updateCloudBadgesUI(false, e.message);
+      }
+    }
+
+    async function forceManualSync() {
+      const icon = document.getElementById("syncSpinnerIcon");
+      if (icon) icon.classList.add("animate-spin");
+      if (currentUser) await saveUserToDB(currentUser);
+      await syncAllUsersFromCloud();
+      if (state.activeTab === "course") {
+        renderSidebar();
+        renderMainContent();
+      } else if (state.activeTab === "admin") {
+        renderAdminDashboardTab();
+      }
+      setTimeout(() => {
+        if (icon) icon.classList.remove("animate-spin");
+      }, 500);
     }
 
     let currentUser = null;
@@ -1175,7 +1336,7 @@
     }
 
     // ============================================================================
-    // LÓGICA DE REGISTRO, LOGIN Y RETOMAR DONDE QUEDÓ
+    // LÓGICA DE REGISTRO, LOGIN Y RETOMA EN CUALQUIER DISPOSITIVO
     // ============================================================================
     function switchAuthMode(mode) {
       const loginForm = document.getElementById("loginForm");
@@ -1207,7 +1368,7 @@
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLoginSubmit");
-      btn.textContent = "Sincronizando tu avance...";
+      btn.textContent = "Sincronizando con la nube...";
       btn.disabled = true;
 
       await syncAllUsersFromCloud();
@@ -1223,7 +1384,7 @@
       btn.disabled = false;
 
       if (!foundUser || foundUser.password !== passInput) {
-        showAuthError("Credenciales incorrectas. Verifica tu correo/usuario y contraseña.");
+        showAuthError("Credenciales incorrectas. Si creaste tu cuenta en otro dispositivo, verifica que la tabla 'elearning_users' esté activa en Supabase.");
         return;
       }
 
@@ -1235,7 +1396,7 @@
     async function handleRegister(e) {
       e.preventDefault();
       const btn = document.getElementById("btnRegisterSubmit");
-      btn.textContent = "Creando tu cuenta...";
+      btn.textContent = "Sincronizando cuenta...";
       btn.disabled = true;
 
       await syncAllUsersFromCloud();
@@ -1271,7 +1432,8 @@
         blockTestStats: {},
         personalNotes: {},
         videoProgress: {},
-        lastPosition: { blockId: 0, moduleId: "M1" }
+        lastPosition: { blockId: 0, moduleId: "M1" },
+        updatedAtMs: Date.now()
       };
 
       await saveUserToDB(newUser);
@@ -1291,7 +1453,6 @@
       localStorage.setItem("re_active_session_email", userObj.email.toLowerCase());
       document.getElementById("authScreen").classList.add("hidden");
       document.getElementById("currentUserNameUI").textContent = userObj.fullName || userObj.username;
-      document.getElementById("currentUserRoleUI").textContent = userObj.role === "admin" ? "Administrador" : `@${userObj.username}`;
 
       const adminTabBtn = document.getElementById("tabBtnAdmin");
       if (userObj.role === "admin") {
@@ -1302,7 +1463,6 @@
         adminTabBtn.classList.remove("flex");
       }
 
-      // Retomar exactamente en el último módulo que estaba viendo el alumno
       if (currentUser.lastPosition && isModuleUnlockedForUser(currentUser.lastPosition.blockId, currentUser.lastPosition.moduleId)) {
         state.currentView = {
           type: "module",
@@ -1325,7 +1485,7 @@
     }
 
     // ============================================================================
-    // REGLAS ESTRICTAS DE DESBLOQUEO SECUENCIAL (VIDEO 100% + EVALUACIÓN BLOQUE)
+    // REGLAS DE DESBLOQUEO SECUENCIAL
     // ============================================================================
     function isBlockUnlockedForUser(blockId) {
       if (!currentUser) return false;
@@ -1415,12 +1575,13 @@
         <div class="max-w-7xl mx-auto space-y-6 pb-12">
           <div class="bg-slate-900 text-white p-5 sm:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-400/30 px-3 py-1 rounded-full mb-2">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Panel de Control · Sincronizado con Supabase
+              <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider ${cloudSyncHealthy ? 'text-emerald-400 bg-emerald-500/10 border-emerald-400/30' : 'text-amber-400 bg-amber-500/10 border-amber-400/30'} border px-3 py-1 rounded-full mb-2">
+                <i data-lucide="${cloudSyncHealthy ? 'cloud' : 'alert-triangle'}" class="w-3.5 h-3.5"></i>
+                ${cloudSyncHealthy ? 'Supabase Cloud Conectado y Sincronizado' : 'Atención: Revisa la conexión SQL de Supabase'}
               </div>
               <h2 class="text-xl sm:text-3xl font-extrabold">Seguimiento de Usuarios y Evaluaciones</h2>
               <p class="text-xs sm:text-sm text-slate-300 mt-1">
-                Monitorea quiénes han ingresado, qué videos han completado, en qué módulo van y la cantidad de intentos por bloque.
+                Monitorea quiénes han ingresado desde PC o teléfono, qué videos han completado y cuántos intentos llevan en cada bloque.
               </p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
@@ -1435,6 +1596,22 @@
               </button>
             </div>
           </div>
+
+          ${
+            !cloudSyncHealthy
+              ? `<div class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-5 text-xs sm:text-sm text-amber-950 space-y-2">
+                  <div class="font-extrabold text-base flex items-center gap-2 text-amber-900">
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600"></i>
+                    ¿Por qué el teléfono y el PC no se están viendo entre sí?
+                  </div>
+                  <p>Supabase devolvió el mensaje: <code class="bg-white px-2 py-0.5 rounded border border-amber-300 font-mono text-rose-700">${lastCloudErrorMsg || 'Sin respuesta de la tabla elearning_users'}</code></p>
+                  <p>Para activarlo inmediatamente: entra a <strong>Supabase &rarr; SQL Editor</strong> y ejecuta:</p>
+                  <pre class="bg-slate-900 text-emerald-300 p-3 rounded-xl overflow-x-auto font-mono text-xs">create table if not exists public.elearning_users (email text primary key, data jsonb, updated_at timestamptz default now());
+alter table public.elearning_users disable row level security;
+grant all on table public.elearning_users to anon, authenticated, service_role;</pre>
+                </div>`
+              : ''
+          }
 
           <!-- Tarjetas de KPIs -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -1508,7 +1685,7 @@
         return `
           <tr>
             <td colspan="9" class="py-10 text-center text-slate-400">
-              Aún no hay participantes registrados. Cuando los miembros del equipo creen su cuenta aparecerán automáticamente en esta tabla.
+              Aún no hay participantes registrados.
             </td>
           </tr>
         `;
@@ -1833,7 +2010,6 @@
                 `;
               }).join("")}
 
-              <!-- BOTÓN DE EVALUACIÓN DEL BLOQUE -->
               <button
                 onclick="${
                   canTakeTest
@@ -1866,14 +2042,13 @@
     }
 
     // ============================================================================
-    // SELECCIÓN DE MÓDULO Y RESOLUCIÓN AUTOMÁTICA DE VIDEO (SUPABASE + LOCAL)
+    // SELECCIÓN DE MÓDULO Y REPRODUCTOR CON RETOMA DE SEGUNDO EN LA NUBE
     // ============================================================================
     async function selectModule(blockId, moduleId) {
       if (!isModuleUnlockedForUser(blockId, moduleId)) return;
       closeMobileSidebar();
       state.currentView = { type: "module", blockId, moduleId };
 
-      // Guardar en Supabase cuál fue el último módulo abierto para retomarlo en cualquier dispositivo
       if (currentUser) {
         currentUser.lastPosition = { blockId, moduleId };
         saveUserToDB(currentUser);
@@ -1889,11 +2064,9 @@
     }
 
     function getVideoSourceForModule(moduleId) {
-      // 1. Si el administrador configuró un link específico en Supabase, ese manda siempre
       if (state.customVideos[moduleId] && state.customVideos[moduleId].trim() !== "") {
         return state.customVideos[moduleId].trim();
       }
-      // 2. Ruta directa al Bucket público "videos" de tu proyecto Supabase
       return `${SUPABASE_PROJECT_URL}/storage/v1/object/public/videos/${moduleId}.mp4`;
     }
 
@@ -1931,7 +2104,6 @@
                 </span>
               </div>
 
-              <!-- Indicador de estado del video obligatorio -->
               <div id="videoStatusBadge" class="text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 ${
                 isWatched
                   ? 'bg-emerald-500 text-slate-950'
@@ -1957,7 +2129,7 @@
             </div>
           </div>
 
-          <!-- REPRODUCTOR DE VIDEO CON CONTROL DE VISUALIZACIÓN Y RETOMA AUTOMÁTICA -->
+          <!-- REPRODUCTOR DE VIDEO -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-3.5 sm:p-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2">
@@ -1967,7 +2139,7 @@
                   <p class="text-[11px] text-slate-400">
                     ${
                       isWatched
-                        ? 'Ya completaste este video. Puedes volver a verlo libremente las veces que quieras.'
+                        ? 'Ya completaste este video. Puedes volver a verlo libremente.'
                         : savedSec > 5
                           ? `Retomando automáticamente desde donde quedaste (${Math.floor(savedSec / 60)}:${String(savedSec % 60).padStart(2, '0')}).`
                           : 'Mira el video hasta el final para habilitar el avance al siguiente módulo.'
@@ -2050,7 +2222,7 @@
             </div>
           </div>
 
-          <!-- APUNTES PERSONALES DEL PARTICIPANTE -->
+          <!-- APUNTES PERSONALES -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
             <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
               <i data-lucide="pen-tool" class="w-4 h-4 text-emerald-600"></i>
@@ -2060,7 +2232,7 @@
             <textarea
               rows="2"
               oninput="savePersonalNote('${mod.id}', this.value)"
-              placeholder="Escribe aquí tus apuntes de este módulo (se sincronizan automáticamente en tu cuenta)..."
+              placeholder="Escribe aquí tus apuntes de este módulo (se sincronizan entre tu PC y teléfono)..."
               class="w-full p-3 rounded-xl border border-slate-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >${currentUser.personalNotes?.[mod.id] || ""}</textarea>
           </div>
@@ -2083,7 +2255,6 @@
       lucide.createIcons();
     }
 
-    // Si el video no está aún en el bucket de Supabase, intenta cargarlo automáticamente de la carpeta local videos/
     function handleVideoFallback(videoEl, moduleId) {
       const localPath = `videos/${moduleId}.mp4`;
       if (!videoEl.dataset.triedLocal) {
@@ -2125,7 +2296,6 @@
       }
     }
 
-    // Control de reproducción con guardado de segundo actual cada 5 segundos
     function setupVideoEnforcement(moduleId) {
       const video = document.getElementById("moduleVideoPlayer");
       if (!video) return;
@@ -2144,12 +2314,20 @@
         if (!video.seeking && video.currentTime > state.videoMaxTimeWatched) {
           state.videoMaxTimeWatched = video.currentTime;
         }
-        // Guardar el segundo donde va cada 5 segundos para que si cierra la página no pierda su lugar
         const now = Date.now();
         if (now - lastSavedTimestamp > 5000 && !currentUser.watchedVideos.includes(moduleId)) {
           lastSavedTimestamp = now;
           if (!currentUser.videoProgress) currentUser.videoProgress = {};
-          currentUser.videoProgress[moduleId] = state.videoMaxTimeWatched;
+          currentUser.videoProgress[moduleId] = Math.max(currentUser.videoProgress[moduleId] || 0, state.videoMaxTimeWatched);
+          saveUserToDB(currentUser);
+        }
+      });
+
+      // Guardar inmediatamente si el usuario pausa el video en el PC o en el teléfono
+      video.addEventListener("pause", () => {
+        if (!currentUser.watchedVideos.includes(moduleId) && state.videoMaxTimeWatched > 2) {
+          if (!currentUser.videoProgress) currentUser.videoProgress = {};
+          currentUser.videoProgress[moduleId] = Math.max(currentUser.videoProgress[moduleId] || 0, state.videoMaxTimeWatched);
           saveUserToDB(currentUser);
         }
       });
@@ -2257,7 +2435,8 @@
         bestScore: newBestScore,
         lastScore: correct,
         passed: isNowPassed,
-        lastDate: new Date().toLocaleString("es-CL")
+        lastDate: new Date().toLocaleString("es-CL"),
+        updatedAtMs: Date.now()
       };
 
       if (correct >= 8) {
@@ -2302,7 +2481,6 @@
             }
           </div>
 
-          <!-- RESULTADO TRAS ENVIAR -->
           ${
             quiz.submitted
               ? `
@@ -2358,7 +2536,6 @@
               : ''
           }
 
-          <!-- PREGUNTAS -->
           <div class="space-y-4">
             ${quiz.questions.map((q, qIdx) => {
               const userAns = quiz.answers[qIdx];
@@ -2428,7 +2605,6 @@
             }).join("")}
           </div>
 
-          <!-- ENVIAR EVALUACIÓN -->
           ${
             !quiz.submitted
               ? `<div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -2448,7 +2624,7 @@
     }
 
     // ============================================================================
-    // FUNCIONES AUXILIARES (ZOOM, NOTAS PERSONALES Y CONFIGURACIÓN ADMIN)
+    // FUNCIONES AUXILIARES Y AUTO-SINCRONIZACIÓN AL VOLVER A LA PESTAÑA
     // ============================================================================
     function openZoomModal(index) {
       state.zoomContext.index = index;
@@ -2491,6 +2667,17 @@
     async function openAdminConfigModal() {
       if (currentUser?.role !== "admin") return;
       await syncAllUsersFromCloud();
+
+      const diagBox = document.getElementById("adminSupaDiagnosticBox");
+      if (diagBox) {
+        diagBox.className = cloudSyncHealthy
+          ? "p-3.5 rounded-xl border bg-emerald-50 border-emerald-200 text-xs text-emerald-900"
+          : "p-3.5 rounded-xl border bg-rose-50 border-rose-200 text-xs text-rose-900";
+        diagBox.innerHTML = cloudSyncHealthy
+          ? `<strong>✓ Conexión a Supabase verificada:</strong> Los videos y avances se están sincronizando correctamente entre PC y teléfonos.`
+          : `<strong>⚠ Atención en Supabase:</strong> ${lastCloudErrorMsg || 'Verifica que la tabla elearning_users exista y tenga RLS desactivado.'}`;
+      }
+
       const container = document.getElementById("videoLinksContainer");
       let html = "";
       COURSE_BLOCKS.forEach(b => {
@@ -2569,7 +2756,20 @@
       if (mobBar) mobBar.style.width = `${pct}%`;
     }
 
-    // Inicialización al abrir la plataforma
+    // Cada vez que el usuario desbloquea el celular o vuelve a la ventana, sincroniza desde Supabase automáticamente
+    document.addEventListener("visibilitychange", async () => {
+      if (document.visibilityState === "visible" && currentUser) {
+        await syncAllUsersFromCloud();
+      }
+    });
+
+    // Sincronización periódica en segundo plano cada 15 segundos
+    setInterval(async () => {
+      if (document.visibilityState === "visible" && currentUser) {
+        await syncAllUsersFromCloud();
+      }
+    }, 15000);
+
     window.addEventListener("DOMContentLoaded", async () => {
       initSupabase();
       await syncAllUsersFromCloud();

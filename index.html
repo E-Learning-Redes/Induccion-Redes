@@ -2,14 +2,18 @@
 <html lang="es-CL">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Academia Redes Enterprise · Plataforma E-Learning</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    body {
+      font-family: 'Inter', sans-serif;
+      height: 100dvh;
+      -webkit-tap-highlight-color: transparent;
+    }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -17,34 +21,34 @@
     .concept-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1); }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden">
+<body class="bg-slate-100 text-slate-800 flex flex-col overflow-hidden">
 
   <!-- ======================================================================== -->
-  <!-- PANTALLA DE LOGIN Y REGISTRO OBLIGATORIO -->
+  <!-- PANTALLA DE LOGIN Y REGISTRO OBLIGATORIO (ADAPTADA A MÓVIL Y ESCRITORIO) -->
   <!-- ======================================================================== -->
   <div id="authScreen" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-8 text-white">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-8 text-white my-auto">
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-blue-600/30">
+          <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-extrabold text-lg sm:text-xl shadow-lg shadow-blue-600/30 shrink-0">
             RE
           </div>
           <div>
-            <h1 class="font-extrabold text-xl tracking-tight">Redes Enterprise</h1>
+            <h1 class="font-extrabold text-lg sm:text-xl tracking-tight">Redes Enterprise</h1>
             <p class="text-xs text-slate-400">Plataforma de Inducción & Certificación</p>
           </div>
         </div>
-        <span id="cloudStatusBadgeAuth" class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full flex items-center gap-1">
+        <span class="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Activo
         </span>
       </div>
 
       <!-- Selector Login / Registro -->
       <div class="grid grid-cols-2 gap-1 bg-slate-800 p-1 rounded-xl mb-6 border border-slate-700">
-        <button onclick="switchAuthMode('login')" id="authTabLogin" class="py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition">
+        <button onclick="switchAuthMode('login')" id="authTabLogin" class="py-2.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition">
           Iniciar Sesión
         </button>
-        <button onclick="switchAuthMode('register')" id="authTabRegister" class="py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+        <button onclick="switchAuthMode('register')" id="authTabRegister" class="py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
           Crear Cuenta
         </button>
       </div>
@@ -55,89 +59,94 @@
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Correo o Nombre de Usuario</label>
-          <input id="loginId" type="text" required placeholder="ejemplo@empresa.cl o tu usuario" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input id="loginId" type="text" required autocomplete="username" placeholder="ejemplo@empresa.cl o tu usuario" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Contraseña</label>
-          <input id="loginPassword" type="password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input id="loginPassword" type="password" required autocomplete="current-password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        <button id="btnLoginSubmit" type="submit" class="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-lg shadow-blue-600/25 transition">
+        <button id="btnLoginSubmit" type="submit" class="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.99] text-white font-extrabold text-sm shadow-lg shadow-blue-600/25 transition">
           Ingresar a la Plataforma
         </button>
       </form>
 
       <!-- FORMULARIO CREAR CUENTA -->
-      <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+      <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nombre y Apellido</label>
-          <input id="regFullName" type="text" required placeholder="Ej: Camila Rojas" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre y Apellido</label>
+          <input id="regFullName" type="text" required placeholder="Ej: Camila Rojas" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Nombre de Usuario</label>
-          <input id="regUsername" type="text" required placeholder="Ej: crojas" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Nombre de Usuario</label>
+          <input id="regUsername" type="text" required autocomplete="username" placeholder="Ej: crojas" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Correo Corporativo</label>
-          <input id="regEmail" type="email" required placeholder="nombre@empresa.cl" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Correo Corporativo</label>
+          <input id="regEmail" type="email" required autocomplete="email" placeholder="nombre@empresa.cl" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Contraseña</label>
-          <input id="regPassword" type="password" required minlength="4" placeholder="Mínimo 4 caracteres" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Contraseña</label>
+          <input id="regPassword" type="password" required minlength="4" autocomplete="new-password" placeholder="Mínimo 4 caracteres" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-base sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        <button id="btnRegisterSubmit" type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/25 transition">
+        <button id="btnRegisterSubmit" type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-extrabold text-sm shadow-lg shadow-emerald-600/25 transition">
           Registrarme y Comenzar
         </button>
       </form>
 
-      <div class="mt-6 pt-5 border-t border-slate-800 text-center">
-        <p class="text-[11px] text-slate-500">
-          El progreso de videos vistos y evaluaciones queda sincronizado en tu cuenta personal.
+      <div class="mt-6 pt-4 border-t border-slate-800 text-center">
+        <p class="text-[11px] text-slate-400">
+          Tu avance se guarda automáticamente en la nube. Puedes continuar desde tu computador o teléfono en cualquier momento.
         </p>
       </div>
     </div>
   </div>
 
   <!-- ======================================================================== -->
-  <!-- BARRA SUPERIOR EJECUTIVA -->
+  <!-- BARRA SUPERIOR EJECUTIVA (CON BOTÓN DE MENÚ MÓVIL) -->
   <!-- ======================================================================== -->
-  <header class="bg-slate-900 text-white h-16 px-4 md:px-6 flex items-center justify-between border-b border-slate-800 shrink-0 z-20">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-extrabold text-lg shadow-lg shadow-blue-600/30 select-none">
+  <header class="bg-slate-900 text-white h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between border-b border-slate-800 shrink-0 z-30">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Botón abrir lista de módulos en teléfono -->
+      <button onclick="toggleMobileSidebar()" id="mobileMenuBtn" class="lg:hidden p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5">
+        <i data-lucide="menu" class="w-5 h-5 text-blue-400"></i>
+        <span class="text-xs font-bold pr-0.5">Módulos</span>
+      </button>
+
+      <div class="hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 items-center justify-center font-extrabold text-base sm:text-lg shadow-lg shadow-blue-600/30 select-none shrink-0">
         RE
       </div>
-      <div>
-        <h1 class="font-bold text-sm md:text-base tracking-tight flex items-center gap-2">
-          Inducción Redes Enterprise
-          <span class="hidden sm:inline-block text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2.5 py-0.5 rounded-full">De Cero a Consultor</span>
+      <div class="truncate">
+        <h1 class="font-bold text-xs sm:text-base tracking-tight flex items-center gap-2 truncate">
+          <span>Redes Enterprise</span>
+          <span class="hidden md:inline-block text-[11px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2.5 py-0.5 rounded-full">De Cero a Consultor</span>
         </h1>
-        <p class="text-[11px] text-slate-400 hidden sm:block">Programa formativo de 26 módulos · 6 bloques temáticos</p>
+        <p class="text-[11px] text-slate-400 hidden md:block">26 módulos · Avance sincronizado en la nube</p>
       </div>
     </div>
 
     <!-- PESTAÑAS DE NAVEGACIÓN PRINCIPAL -->
-    <div class="flex items-center gap-2 sm:gap-3">
+    <div class="flex items-center gap-1.5 sm:gap-3">
       <nav class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700">
-        <button onclick="switchMainTab('course')" id="tabBtnCourse" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition bg-blue-600 text-white shadow">
-          <i data-lucide="graduation-cap" class="w-4 h-4"></i>
-          <span class="hidden md:inline">Curso</span>
+        <button onclick="switchMainTab('course')" id="tabBtnCourse" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition bg-blue-600 text-white shadow">
+          <i data-lucide="graduation-cap" class="w-4 h-4 shrink-0"></i>
+          <span class="hidden sm:inline">Curso</span>
         </button>
-        <button onclick="switchMainTab('documents')" id="tabBtnDocs" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
-          <i data-lucide="folder-down" class="w-4 h-4"></i>
-          <span class="hidden md:inline">Documentos</span>
-          <span class="bg-blue-500/30 text-blue-200 px-1.5 py-0.2 rounded text-[10px]">4</span>
+        <button onclick="switchMainTab('documents')" id="tabBtnDocs" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
+          <i data-lucide="folder-down" class="w-4 h-4 shrink-0"></i>
+          <span class="hidden sm:inline">Documentos</span>
         </button>
-        <button onclick="switchMainTab('glossary')" id="tabBtnGlossary" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
-          <i data-lucide="book-open" class="w-4 h-4"></i>
-          <span class="hidden md:inline">Glosario</span>
+        <button onclick="switchMainTab('glossary')" id="tabBtnGlossary" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition text-slate-300 hover:text-white">
+          <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
+          <span class="hidden sm:inline">Glosario</span>
         </button>
         <!-- PESTAÑA EXCLUSIVA DE ADMINISTRADOR -->
-        <button onclick="switchMainTab('admin')" id="tabBtnAdmin" class="hidden px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1.5 transition text-amber-300 hover:text-white">
-          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-          <span>Panel Admin</span>
+        <button onclick="switchMainTab('admin')" id="tabBtnAdmin" class="hidden px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold items-center gap-1.5 transition text-amber-300 hover:text-white">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
+          <span class="hidden sm:inline">Admin</span>
         </button>
       </nav>
 
-      <!-- Barra de progreso del usuario actual -->
+      <!-- Barra de progreso compacta -->
       <div class="hidden xl:flex items-center gap-3 bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-slate-700">
         <div class="text-xs">
           <span class="text-slate-400">Avance:</span>
@@ -149,10 +158,10 @@
       </div>
 
       <!-- Perfil del usuario activo y Cerrar Sesión -->
-      <div class="flex items-center gap-2 bg-slate-800/90 pl-3 pr-2 py-1 rounded-xl border border-slate-700">
-        <div class="text-right hidden sm:block">
-          <div id="currentUserNameUI" class="text-xs font-bold text-white leading-none">Usuario</div>
-          <div id="currentUserRoleUI" class="text-[10px] text-slate-400 mt-0.5">Participante</div>
+      <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-800/90 pl-2 sm:pl-3 pr-1.5 py-1 rounded-xl border border-slate-700">
+        <div class="text-right hidden md:block">
+          <div id="currentUserNameUI" class="text-xs font-bold text-white leading-none truncate max-w-[120px]">Usuario</div>
+          <div id="currentUserRoleUI" class="text-[10px] text-emerald-400 mt-0.5">Sincronizado ✓</div>
         </div>
         <button onclick="handleLogout()" title="Cerrar Sesión" class="p-1.5 rounded-lg bg-slate-700/70 hover:bg-rose-600 text-slate-300 hover:text-white transition">
           <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -161,91 +170,113 @@
     </div>
   </header>
 
+  <!-- SUB-BARRA DE AVANCE EN TELÉFONOS -->
+  <div class="xl:hidden bg-slate-900/95 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-300 shrink-0">
+    <span id="mobileCurrentModuleLabel" class="font-semibold text-blue-300 truncate pr-2">M1. Cómo viaja un dato</span>
+    <div class="flex items-center gap-2 shrink-0">
+      <span>Avance: <strong id="mobileProgressText" class="text-emerald-400">0%</strong></span>
+      <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+        <div id="mobileProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- CONTENEDOR PRINCIPAL -->
-  <div class="flex flex-1 overflow-hidden">
+  <div class="flex flex-1 overflow-hidden relative">
     
-    <!-- SIDEBAR DE MÓDULOS Y BLOQUES -->
-    <aside id="courseSidebar" class="w-80 bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 shrink-0">
-      <div class="p-4 border-b border-slate-800 bg-slate-950/40">
-        <div class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Progreso Secuencial</div>
-        <div class="text-xs text-slate-400 leading-relaxed">
-          Debes ver el <strong class="text-white">100% del video</strong> de cada módulo para habilitar el siguiente, y aprobar la evaluación del bloque con un <strong class="text-white">80% (8/10)</strong>.
+    <!-- FONDO OSCURO PARA CERRAR EL MENÚ EN MÓVILES -->
+    <div id="mobileSidebarBackdrop" onclick="closeMobileSidebar()" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+
+    <!-- SIDEBAR DE MÓDULOS Y BLOQUES (DRAWER EN MÓVIL, FIJO EN ESCRITORIO) -->
+    <aside id="courseSidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-80 max-w-[85vw] bg-slate-900 text-slate-200 flex flex-col border-r border-slate-800 shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+      <div class="p-4 border-b border-slate-800 bg-slate-950/40 flex items-start justify-between gap-2">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">Progreso Secuencial</div>
+          <div class="text-xs text-slate-400 leading-relaxed">
+            Completa el <strong class="text-white">100% del video</strong> de cada módulo para habilitar el siguiente y aprueba cada bloque con <strong class="text-white">80% (8/10)</strong>.
+          </div>
         </div>
+        <button onclick="closeMobileSidebar()" class="lg:hidden p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white shrink-0">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
       </div>
       <div id="sidebarContainer" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3"></div>
     </aside>
 
     <!-- ÁREA DE CONTENIDO CENTRAL -->
-    <main id="mainContent" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 bg-slate-50"></main>
+    <main id="mainContent" class="flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 bg-slate-50"></main>
 
   </div>
 
-  <!-- MODAL: MODO ZOOM EDUCATIVO -->
-  <div id="zoomModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 md:p-8 shadow-2xl border border-slate-200 relative">
-      <button onclick="closeZoomModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+  <!-- MODAL: MODO ZOOM EDUCATIVO (ADAPTADO A MÓVIL) -->
+  <div id="zoomModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90dvh] overflow-y-auto p-5 sm:p-8 shadow-2xl border border-slate-200 relative">
+      <button onclick="closeZoomModal()" class="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
-      <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-3">
-        <i data-lucide="zoom-in" class="w-4 h-4"></i> Vista Detallada · Concepto Clave
+      <div class="inline-flex items-center gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-3 pr-8">
+        <i data-lucide="zoom-in" class="w-4 h-4 shrink-0"></i> Vista Detallada · Concepto Clave
       </div>
-      <h3 id="zoomTermTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-4"></h3>
+      <h3 id="zoomTermTitle" class="text-xl sm:text-3xl font-extrabold text-slate-900 mb-4"></h3>
       
-      <div class="space-y-4">
-        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+      <div class="space-y-3.5 sm:space-y-4">
+        <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
           <div class="text-xs font-bold uppercase text-slate-400 mb-1">Definición en Simple</div>
-          <p id="zoomTermDef" class="text-lg text-slate-800 font-medium leading-relaxed"></p>
+          <p id="zoomTermDef" class="text-base sm:text-lg text-slate-800 font-medium leading-relaxed"></p>
         </div>
 
-        <div class="bg-amber-50/90 p-5 rounded-xl border border-amber-200">
+        <div class="bg-amber-50/90 p-4 sm:p-5 rounded-xl border border-amber-200">
           <div class="text-xs font-bold uppercase text-amber-700 mb-1 flex items-center gap-1.5">
-            <i data-lucide="lightbulb" class="w-4 h-4"></i> Analogía y Ejemplo Práctico
+            <i data-lucide="lightbulb" class="w-4 h-4 shrink-0"></i> Analogía y Ejemplo Práctico
           </div>
-          <p id="zoomTermAnalogy" class="text-lg text-amber-950 leading-relaxed"></p>
+          <p id="zoomTermAnalogy" class="text-base sm:text-lg text-amber-950 leading-relaxed"></p>
         </div>
       </div>
 
-      <div class="mt-6 flex justify-between items-center pt-4 border-t border-slate-100">
-        <button onclick="stepZoom(-1)" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm flex items-center gap-1">
+      <div class="mt-6 flex justify-between items-center pt-4 border-t border-slate-100 gap-2">
+        <button onclick="stepZoom(-1)" class="px-3.5 sm:px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm flex items-center gap-1">
           <i data-lucide="chevron-left" class="w-4 h-4"></i> Anterior
         </button>
         <span id="zoomCounter" class="text-xs font-bold text-slate-400"></span>
-        <button onclick="stepZoom(1)" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm flex items-center gap-1">
+        <button onclick="stepZoom(1)" class="px-3.5 sm:px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs sm:text-sm flex items-center gap-1">
           Siguiente <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: CONFIGURACIÓN DE VIDEOS (SOLO ADMIN) -->
-  <div id="adminConfigModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-200">
-      <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white rounded-t-2xl">
+  <!-- MODAL: CONFIGURACIÓN DE VIDEOS (SOLO ADMIN - GUARDADO EN SUPABASE) -->
+  <div id="adminConfigModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90dvh] flex flex-col shadow-2xl border border-slate-200">
+      <div class="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white rounded-t-2xl">
         <div>
-          <h3 class="text-lg font-bold flex items-center gap-2">
-            <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i>
-            Gestión de Enlaces de Video por Módulo
+          <h3 class="text-base sm:text-lg font-bold flex items-center gap-2">
+            <i data-lucide="settings" class="w-5 h-5 text-blue-400 shrink-0"></i>
+            Enlaces de Video en Supabase (Permanentes)
           </h3>
           <p class="text-xs text-slate-400 mt-0.5">
-            Por defecto la plataforma carga <code class="text-blue-300">videos/M1.mp4</code> hasta <code class="text-blue-300">videos/M26.mp4</code>. Si alojas algún video en una URL externa, pégala aquí y se sincronizará con todos los usuarios en Supabase.
+            Estos links quedan guardados directamente en la base de datos de Supabase. Aunque actualices el archivo HTML, nunca se deslinkean.
           </p>
         </div>
-        <button onclick="closeAdminConfigModal()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300">
+        <button onclick="closeAdminConfigModal()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 shrink-0">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-3 flex-1">
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-3 flex-1">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 text-xs text-blue-950">
+          <strong>💡 Ruta automática en tu Storage de Supabase:</strong> Si subes tus videos a un bucket público llamado <code class="bg-white px-1.5 py-0.5 rounded font-mono">videos</code> en tu Supabase con los nombres <code class="bg-white px-1.5 py-0.5 rounded font-mono">M1.mp4</code>, <code class="bg-white px-1.5 py-0.5 rounded font-mono">M2.mp4</code>, etc., la plataforma los detectará automáticamente sin necesidad de pegar links uno por uno.
+        </div>
         <div id="videoLinksContainer" class="space-y-2.5"></div>
       </div>
 
-      <div class="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center rounded-b-2xl">
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-2 rounded-b-2xl">
         <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
-          <i data-lucide="check-circle" class="w-4 h-4"></i> Conectado a Supabase: jdwonyunvlqbgpbdisyn
+          <i data-lucide="cloud" class="w-4 h-4"></i> Guardado permanente en Supabase Cloud
         </span>
         <div class="flex gap-2">
-          <button onclick="closeAdminConfigModal()" class="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold">Cancelar</button>
-          <button onclick="saveAdminConfig()" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold shadow">Guardar y Sincronizar</button>
+          <button onclick="closeAdminConfigModal()" class="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs sm:text-sm font-semibold">Cancelar</button>
+          <button id="btnSaveVideoConfig" onclick="saveAdminConfig()" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow">Guardar en Supabase</button>
         </div>
       </div>
     </div>
@@ -253,7 +284,7 @@
 
   <script>
     // ============================================================================
-    // CREDENCIALES FIJAS DE SUPABASE (SINCRONIZACIÓN AUTOMÁTICA MULTI-DISPOSITIVO)
+    // CREDENCIALES FIJAS DE SUPABASE (SINCRONIZACIÓN PERMANENTE EN LA NUBE)
     // ============================================================================
     const SUPABASE_PROJECT_URL = "https://jdwonyunvlqbgpbdisyn.supabase.co";
     const SUPABASE_ANON_PUBLIC_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impkd29ueXVudmxxYmdwYmRpc3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzk3NTgsImV4cCI6MjEwODYxNTc1OH0.QdXdCxtNKJUCd0iml821YRoazOmL3B2yfQQMgZ0ChRM";
@@ -270,7 +301,9 @@
       watchedVideos: [],
       unlockedBlocks: [0, 1, 2, 3, 4, 5],
       blockTestStats: {},
-      personalNotes: {}
+      personalNotes: {},
+      videoProgress: {},
+      lastPosition: { blockId: 0, moduleId: "M1" }
     };
 
     // Documentos oficiales descargables
@@ -1072,6 +1105,7 @@
     }
 
     async function saveUserToDB(userObj) {
+      if (!userObj || !userObj.email) return;
       const db = getUsersDB();
       db[userObj.email.toLowerCase()] = userObj;
       localStorage.setItem("re_users_db", JSON.stringify(db));
@@ -1087,6 +1121,7 @@
       }
     }
 
+    // Fusión inteligente para que jamás se pierdan enlaces de videos ni avances de usuarios
     async function syncAllUsersFromCloud() {
       if (!supabaseClient) return;
       try {
@@ -1095,7 +1130,8 @@
           const db = getUsersDB();
           data.forEach(row => {
             if (row.email === "__system_config__" && row.data?.customVideos) {
-              state.customVideos = row.data.customVideos;
+              // Combinar links de la nube con los locales sin borrar ninguno existente
+              state.customVideos = { ...state.customVideos, ...row.data.customVideos };
               localStorage.setItem("re_customVideos", JSON.stringify(state.customVideos));
             } else if (row.email && row.data) {
               db[row.email.toLowerCase()] = row.data;
@@ -1117,7 +1153,29 @@
     };
 
     // ============================================================================
-    // LÓGICA DE REGISTRO, LOGIN Y LOGOUT
+    // CONTROL DEL MENÚ LATERAL EN TELÉFONOS MÓVILES
+    // ============================================================================
+    function toggleMobileSidebar() {
+      const sb = document.getElementById("courseSidebar");
+      const bd = document.getElementById("mobileSidebarBackdrop");
+      const isHidden = sb.classList.contains("-translate-x-full");
+      if (isHidden) {
+        sb.classList.remove("-translate-x-full");
+        bd.classList.remove("hidden");
+      } else {
+        closeMobileSidebar();
+      }
+    }
+
+    function closeMobileSidebar() {
+      const sb = document.getElementById("courseSidebar");
+      const bd = document.getElementById("mobileSidebarBackdrop");
+      sb.classList.add("-translate-x-full");
+      bd.classList.add("hidden");
+    }
+
+    // ============================================================================
+    // LÓGICA DE REGISTRO, LOGIN Y RETOMAR DONDE QUEDÓ
     // ============================================================================
     function switchAuthMode(mode) {
       const loginForm = document.getElementById("loginForm");
@@ -1130,13 +1188,13 @@
       if (mode === "login") {
         loginForm.classList.remove("hidden");
         registerForm.classList.add("hidden");
-        tabLogin.className = "py-2 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition";
-        tabReg.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        tabLogin.className = "py-2.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow transition";
+        tabReg.className = "py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
       } else {
         loginForm.classList.add("hidden");
         registerForm.classList.remove("hidden");
-        tabReg.className = "py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition";
-        tabLogin.className = "py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        tabReg.className = "py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition";
+        tabLogin.className = "py-2.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
       }
     }
 
@@ -1149,7 +1207,7 @@
     async function handleLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLoginSubmit");
-      btn.textContent = "Verificando cuenta...";
+      btn.textContent = "Sincronizando tu avance...";
       btn.disabled = true;
 
       await syncAllUsersFromCloud();
@@ -1177,7 +1235,7 @@
     async function handleRegister(e) {
       e.preventDefault();
       const btn = document.getElementById("btnRegisterSubmit");
-      btn.textContent = "Creando cuenta...";
+      btn.textContent = "Creando tu cuenta...";
       btn.disabled = true;
 
       await syncAllUsersFromCloud();
@@ -1211,7 +1269,9 @@
         watchedVideos: [],
         unlockedBlocks: [0],
         blockTestStats: {},
-        personalNotes: {}
+        personalNotes: {},
+        videoProgress: {},
+        lastPosition: { blockId: 0, moduleId: "M1" }
       };
 
       await saveUserToDB(newUser);
@@ -1222,6 +1282,12 @@
 
     function loginSuccess(userObj) {
       currentUser = userObj;
+      if (!currentUser.watchedVideos) currentUser.watchedVideos = [];
+      if (!currentUser.unlockedBlocks) currentUser.unlockedBlocks = [0];
+      if (!currentUser.blockTestStats) currentUser.blockTestStats = {};
+      if (!currentUser.personalNotes) currentUser.personalNotes = {};
+      if (!currentUser.videoProgress) currentUser.videoProgress = {};
+
       localStorage.setItem("re_active_session_email", userObj.email.toLowerCase());
       document.getElementById("authScreen").classList.add("hidden");
       document.getElementById("currentUserNameUI").textContent = userObj.fullName || userObj.username;
@@ -1234,6 +1300,17 @@
       } else {
         adminTabBtn.classList.add("hidden");
         adminTabBtn.classList.remove("flex");
+      }
+
+      // Retomar exactamente en el último módulo que estaba viendo el alumno
+      if (currentUser.lastPosition && isModuleUnlockedForUser(currentUser.lastPosition.blockId, currentUser.lastPosition.moduleId)) {
+        state.currentView = {
+          type: "module",
+          blockId: currentUser.lastPosition.blockId,
+          moduleId: currentUser.lastPosition.moduleId
+        };
+      } else {
+        state.currentView = { type: "module", blockId: 0, moduleId: "M1" };
       }
 
       updateGlobalProgressUI();
@@ -1262,8 +1339,9 @@
       if (!isBlockUnlockedForUser(blockId)) return false;
 
       const block = COURSE_BLOCKS.find(b => b.id === blockId);
+      if (!block) return false;
       const modIdx = block.modules.findIndex(m => m.id === moduleId);
-      if (modIdx === 0) return true;
+      if (modIdx <= 0) return true;
 
       const prevModuleId = block.modules[modIdx - 1].id;
       return currentUser.watchedVideos.includes(prevModuleId);
@@ -1281,13 +1359,15 @@
     // ============================================================================
     function switchMainTab(tabName) {
       state.activeTab = tabName;
+      closeMobileSidebar();
       const sidebar = document.getElementById("courseSidebar");
+      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
       const btnCourse = document.getElementById("tabBtnCourse");
       const btnDocs = document.getElementById("tabBtnDocs");
       const btnGlossary = document.getElementById("tabBtnGlossary");
       const btnAdmin = document.getElementById("tabBtnAdmin");
 
-      const baseClass = "px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ";
+      const baseClass = "px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ";
       btnCourse.className = baseClass + (tabName === "course" ? "bg-blue-600 text-white shadow" : "text-slate-300 hover:text-white");
       btnDocs.className = baseClass + (tabName === "documents" ? "bg-blue-600 text-white shadow" : "text-slate-300 hover:text-white");
       btnGlossary.className = baseClass + (tabName === "glossary" ? "bg-blue-600 text-white shadow" : "text-slate-300 hover:text-white");
@@ -1297,11 +1377,13 @@
       }
 
       if (tabName === "course") {
-        sidebar.classList.remove("hidden");
+        sidebar.classList.remove("lg:hidden");
+        mobileMenuBtn.classList.remove("hidden");
         renderSidebar();
         renderMainContent();
       } else {
-        sidebar.classList.add("hidden");
+        sidebar.classList.add("lg:hidden");
+        mobileMenuBtn.classList.add("hidden");
         if (tabName === "documents") renderDocumentsTab();
         if (tabName === "glossary") renderGlossaryTab();
         if (tabName === "admin") renderAdminDashboardTab();
@@ -1310,13 +1392,13 @@
     }
 
     // ============================================================================
-    // PESTAÑA EXCLUSIVA DE ADMINISTRADOR: REPORTE DE AVANCE DE USUARIOS
+    // PESTAÑA EXCLUSIVA DE ADMINISTRADOR
     // ============================================================================
     async function renderAdminDashboardTab() {
       const main = document.getElementById("mainContent");
       await syncAllUsersFromCloud();
       const db = getUsersDB();
-      const allUsers = Object.values(db).filter(u => u.role !== "admin");
+      const allUsers = Object.values(db).filter(u => u.role !== "admin" && u.email !== "__system_config__");
 
       const totalMods = ALL_MODULES_FLAT.length;
       const totalUsers = allUsers.length;
@@ -1331,51 +1413,50 @@
 
       main.innerHTML = `
         <div class="max-w-7xl mx-auto space-y-6 pb-12">
-          <!-- Encabezado Admin -->
-          <div class="bg-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="bg-slate-900 text-white p-5 sm:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-400/30 px-3 py-1 rounded-full mb-2">
                 <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Panel de Control · Sincronizado con Supabase
               </div>
-              <h2 class="text-2xl md:text-3xl font-extrabold">Seguimiento de Usuarios y Evaluaciones</h2>
-              <p class="text-xs md:text-sm text-slate-300 mt-1">
-                Monitorea en tiempo real quiénes han ingresado, qué videos han completado, sus calificaciones por bloque y la cantidad de intentos realizados.
+              <h2 class="text-xl sm:text-3xl font-extrabold">Seguimiento de Usuarios y Evaluaciones</h2>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                Monitorea quiénes han ingresado, qué videos han completado, en qué módulo van y la cantidad de intentos por bloque.
               </p>
             </div>
-            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
               <button onclick="renderAdminDashboardTab()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
-                <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-400"></i> Actualizar Datos
+                <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-400"></i> Actualizar
               </button>
-              <button onclick="openAdminConfigModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
-                <i data-lucide="video" class="w-4 h-4 text-blue-400"></i> Enlaces de Videos
+              <button onclick="openAdminConfigModal()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow flex items-center gap-1.5">
+                <i data-lucide="video" class="w-4 h-4"></i> Enlaces de Videos
               </button>
               <button onclick="exportUsersCSV()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow flex items-center gap-1.5">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Excel (CSV)
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Excel
               </button>
             </div>
           </div>
 
           <!-- Tarjetas de KPIs -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div class="text-xs font-bold uppercase text-slate-400">Usuarios Registrados</div>
-              <div class="text-3xl font-extrabold text-slate-900 mt-1">${totalUsers}</div>
-              <div class="text-xs text-slate-500 mt-1">Participantes en plataforma</div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-[11px] sm:text-xs font-bold uppercase text-slate-400">Inscritos</div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">${totalUsers}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Cuentas activas</div>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div class="text-xs font-bold uppercase text-slate-400">Avance Promedio</div>
-              <div class="text-3xl font-extrabold text-blue-600 mt-1">${avgProgress}%</div>
-              <div class="text-xs text-slate-500 mt-1">Sobre los 26 videos obligatorios</div>
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-[11px] sm:text-xs font-bold uppercase text-slate-400">Avance Promedio</div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-blue-600 mt-1">${avgProgress}%</div>
+              <div class="text-[11px] text-slate-500 mt-1">De los 26 módulos</div>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div class="text-xs font-bold uppercase text-slate-400">Evaluaciones Rendidas</div>
-              <div class="text-3xl font-extrabold text-amber-600 mt-1">${totalTestAttempts}</div>
-              <div class="text-xs text-slate-500 mt-1">Intentos totales acumulados</div>
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-[11px] sm:text-xs font-bold uppercase text-slate-400">Tests Rendidos</div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">${totalTestAttempts}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Intentos totales</div>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div class="text-xs font-bold uppercase text-slate-400">Curso 100% Aprobado</div>
-              <div class="text-3xl font-extrabold text-emerald-600 mt-1">${graduatedCount}</div>
-              <div class="text-xs text-slate-500 mt-1">Aprobaron hasta el Bloque 5</div>
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div class="text-[11px] sm:text-xs font-bold uppercase text-slate-400">Graduados</div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">${graduatedCount}</div>
+              <div class="text-[11px] text-slate-500 mt-1">Curso 100% aprobado</div>
             </div>
           </div>
 
@@ -1384,7 +1465,7 @@
             <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50">
               <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
                 <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
-                Detalle por Participante
+                Avance Detallado por Participante
               </h3>
               <input
                 id="adminUserSearch"
@@ -1437,7 +1518,7 @@
       return usersList.map(u => {
         const watchedCount = u.watchedVideos?.length || 0;
         const pct = Math.round((watchedCount / totalMods) * 100);
-        const lastModWatched = watchedCount > 0 ? u.watchedVideos[watchedCount - 1] : "Sin iniciar";
+        const currentMod = u.lastPosition?.moduleId || (watchedCount > 0 ? u.watchedVideos[watchedCount - 1] : "M1");
 
         const blockCells = [0, 1, 2, 3, 4, 5].map(bId => {
           const st = u.blockTestStats?.[bId];
@@ -1451,7 +1532,7 @@
             <td class="py-3 px-2 text-center">
               <div class="inline-flex flex-col items-center px-2 py-1 rounded-lg border ${badgeClass}">
                 <span class="font-extrabold text-[11px]">${st.bestScore * 10}% (${st.bestScore}/10)</span>
-                <span class="text-[10px] opacity-80">${st.attempts} ${st.attempts === 1 ? 'intento' : 'intentos'}</span>
+                <span class="text-[10px] opacity-80">${st.attempts} ${st.attempts === 1 ? 'int.' : 'ints.'}</span>
               </div>
             </td>
           `;
@@ -1465,12 +1546,12 @@
             </td>
             <td class="py-3.5 px-3 text-slate-600 whitespace-nowrap">
               <div>${u.lastLogin || "—"}</div>
-              <div class="text-[10px] text-slate-400">Creado: ${u.createdAt || "—"}</div>
+              <div class="text-[10px] text-slate-400">Módulo actual: <strong class="text-slate-700">${currentMod}</strong></div>
             </td>
             <td class="py-3.5 px-4 min-w-[180px]">
               <div class="flex items-center justify-between text-[11px] font-bold mb-1">
-                <span class="text-slate-700">${watchedCount}/${totalMods} videos (${pct}%)</span>
-                <span class="text-blue-600">Último: ${lastModWatched}</span>
+                <span class="text-slate-700">${watchedCount}/${totalMods} (${pct}%)</span>
+                <span class="text-emerald-600">${watchedCount === 26 ? 'Completado' : 'En curso'}</span>
               </div>
               <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                 <div class="h-full bg-emerald-500" style="width: ${pct}%"></div>
@@ -1492,9 +1573,9 @@
 
     function exportUsersCSV() {
       const db = getUsersDB();
-      const users = Object.values(db).filter(u => u.role !== "admin");
+      const users = Object.values(db).filter(u => u.role !== "admin" && u.email !== "__system_config__");
       const headers = [
-        "Nombre", "Usuario", "Correo", "Fecha Registro", "Ultimo Acceso",
+        "Nombre", "Usuario", "Correo", "Fecha Registro", "Ultimo Acceso", "Modulo Actual",
         "Videos Vistos (de 26)", "Porcentaje Avance",
         "B0 Nota Max", "B0 Intentos",
         "B1 Nota Max", "B1 Intentos",
@@ -1509,7 +1590,7 @@
         const pct = Math.round((w / 26) * 100) + "%";
         const cols = [
           `"${u.fullName || ""}"`, `"${u.username}"`, `"${u.email}"`, `"${u.createdAt || ""}"`, `"${u.lastLogin || ""}"`,
-          w, pct
+          `"${u.lastPosition?.moduleId || "M1"}"`, w, pct
         ];
         [0, 1, 2, 3, 4, 5].forEach(bId => {
           const st = u.blockTestStats?.[bId];
@@ -1543,29 +1624,29 @@
 
       main.innerHTML = `
         <div class="max-w-5xl mx-auto space-y-6 pb-12">
-          <div class="bg-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="bg-slate-900 text-white p-5 sm:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-400/20 px-3 py-1 rounded-full mb-2">
                 <i data-lucide="folder-down" class="w-3.5 h-3.5"></i> Biblioteca Oficial del Programa
               </div>
-              <h2 class="text-2xl md:text-3xl font-extrabold">Material de Estudio y Guías Descargables</h2>
-              <p class="text-xs md:text-sm text-slate-300 mt-1 max-w-2xl">
+              <h2 class="text-xl sm:text-3xl font-extrabold">Material de Estudio y Guías Descargables</h2>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
                 Descarga los manuales oficiales, las 150 láminas ilustradas de redes y fibra óptica, y el plan de estudio de 30 días para consulta permanente.
               </p>
             </div>
-            <button onclick="switchMainTab('course')" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+            <button onclick="switchMainTab('course')" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 self-start md:self-auto">
               <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Curso
             </button>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-6">
+          <div class="grid md:grid-cols-2 gap-4 sm:gap-6">
             ${COURSE_DOCUMENTS.map(doc => {
               const c = colorClasses[doc.color] || colorClasses.blue;
               return `
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-6 flex flex-col justify-between">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 sm:p-6 flex flex-col justify-between">
                   <div>
                     <div class="flex items-start justify-between gap-3 mb-4">
-                      <div class="w-12 h-12 rounded-2xl ${c.iconBg} text-white flex items-center justify-center shadow-md shrink-0">
+                      <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${c.iconBg} text-white flex items-center justify-center shadow-md shrink-0">
                         <i data-lucide="${doc.icon}" class="w-6 h-6"></i>
                       </div>
                       <div class="flex flex-wrap gap-1.5 justify-end">
@@ -1574,9 +1655,9 @@
                       </div>
                     </div>
 
-                    <h3 class="text-lg font-extrabold text-slate-900 leading-snug">${doc.title}</h3>
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">${doc.title}</h3>
                     <p class="text-xs font-semibold text-slate-500 mt-0.5 mb-3">${doc.subtitle}</p>
-                    <p class="text-xs md:text-sm text-slate-600 leading-relaxed mb-4">${doc.description}</p>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">${doc.description}</p>
 
                     <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 mb-5">
                       <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Contenido incluido:</div>
@@ -1591,7 +1672,7 @@
                     </div>
                   </div>
 
-                  <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
                     <div class="text-[11px] text-slate-400 truncate">
                       <span class="font-mono text-slate-600">${doc.fileName}</span>
                     </div>
@@ -1599,7 +1680,7 @@
                       <a href="${doc.filePath}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Abrir
                       </a>
-                      <a href="${doc.filePath}" download="${doc.fileName}" class="px-4 py-2 rounded-xl ${c.btn} text-white font-bold text-xs flex items-center gap-1.5 shadow transition">
+                      <a href="${doc.filePath}" download="${doc.fileName}" class="px-3.5 py-2 rounded-xl ${c.btn} text-white font-bold text-xs flex items-center gap-1.5 shadow transition">
                         <i data-lucide="download" class="w-3.5 h-3.5"></i> Descargar
                       </a>
                     </div>
@@ -1620,27 +1701,27 @@
       const main = document.getElementById("mainContent");
       main.innerHTML = `
         <div class="max-w-5xl mx-auto space-y-6 pb-12">
-          <div class="bg-slate-900 text-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="bg-slate-900 text-white p-5 sm:p-8 rounded-2xl shadow-lg border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-400/20 px-3 py-1 rounded-full mb-2">
                 <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Diccionario Interactivo
               </div>
-              <h2 class="text-2xl md:text-3xl font-extrabold">Glosario Consolidado del Curso</h2>
-              <p class="text-xs md:text-sm text-slate-300 mt-1">
+              <h2 class="text-xl sm:text-3xl font-extrabold">Glosario Consolidado del Curso</h2>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1">
                 Todos los conceptos técnicos de los 26 módulos traducidos a lenguaje simple con su analogía práctica.
               </p>
             </div>
-            <button onclick="switchMainTab('course')" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+            <button onclick="switchMainTab('course')" class="shrink-0 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 self-start md:self-auto">
               <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al Curso
             </button>
           </div>
 
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
             <input
               id="glossarySearchInput"
               oninput="filterGlossaryItems()"
               type="text"
-              placeholder="Escribe cualquier sigla o término para filtrar (ej. VLAN, Gateway, GPON, BFD, Payback, ZTNA, OTDR...)"
+              placeholder="Escribe cualquier sigla o término (ej. VLAN, Gateway, GPON, BFD, Payback, ZTNA, OTDR...)"
               class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -1674,13 +1755,13 @@
       });
 
       container.innerHTML = allItems.map(item => `
-        <div class="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
+        <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between gap-2 mb-2">
               <span class="font-extrabold text-slate-900 text-base">${item.term}</span>
               <span class="text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded-full shrink-0">${item.modId}</span>
             </div>
-            <p class="text-xs md:text-sm text-slate-700 leading-relaxed mb-3">${item.def}</p>
+            <p class="text-xs sm:text-sm text-slate-700 leading-relaxed mb-3">${item.def}</p>
           </div>
           <div class="text-xs text-amber-950 bg-amber-50/90 p-3 rounded-xl border border-amber-200/80">
             <strong class="text-amber-800">💡 Analogía / Ejemplo:</strong> ${item.analogy}
@@ -1690,7 +1771,7 @@
     }
 
     // ============================================================================
-    // SIDEBAR CON CANDADOS POR MÓDULO (VIDEO OBLIGATORIO) Y POR BLOQUE (TEST 80%)
+    // SIDEBAR CON CANDADOS POR MÓDULO Y POR BLOQUE
     // ============================================================================
     function renderSidebar() {
       if (!currentUser) return;
@@ -1732,7 +1813,7 @@
                           ? `alert('Para abrir este bloque debes aprobar primero la evaluación del ${COURSE_BLOCKS[block.id - 1].code} con un mínimo de 80% (8/10).')`
                           : `alert('Para desbloquear ${mod.id} debes terminar de ver el video completo de ${prevModId} al menos una vez.')`
                     }"
-                    class="w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between transition ${
+                    class="w-full text-left px-3 py-2.5 rounded-lg text-xs flex items-center justify-between transition ${
                       isSelected
                         ? 'bg-blue-600 text-white font-semibold shadow'
                         : modUnlocked
@@ -1785,12 +1866,19 @@
     }
 
     // ============================================================================
-    // VISTA DE UN MÓDULO Y REPRODUCTOR CON BLOQUEO HASTA VER EL 100%
+    // SELECCIÓN DE MÓDULO Y RESOLUCIÓN AUTOMÁTICA DE VIDEO (SUPABASE + LOCAL)
     // ============================================================================
-    function selectModule(blockId, moduleId) {
+    async function selectModule(blockId, moduleId) {
       if (!isModuleUnlockedForUser(blockId, moduleId)) return;
+      closeMobileSidebar();
       state.currentView = { type: "module", blockId, moduleId };
-      state.videoMaxTimeWatched = 0;
+
+      // Guardar en Supabase cuál fue el último módulo abierto para retomarlo en cualquier dispositivo
+      if (currentUser) {
+        currentUser.lastPosition = { blockId, moduleId };
+        saveUserToDB(currentUser);
+      }
+
       if (state.activeTab !== "course") {
         switchMainTab("course");
         return;
@@ -1801,10 +1889,12 @@
     }
 
     function getVideoSourceForModule(moduleId) {
+      // 1. Si el administrador configuró un link específico en Supabase, ese manda siempre
       if (state.customVideos[moduleId] && state.customVideos[moduleId].trim() !== "") {
         return state.customVideos[moduleId].trim();
       }
-      return `videos/${moduleId}.mp4`;
+      // 2. Ruta directa al Bucket público "videos" de tu proyecto Supabase
+      return `${SUPABASE_PROJECT_URL}/storage/v1/object/public/videos/${moduleId}.mp4`;
     }
 
     function renderMainContent() {
@@ -1821,77 +1911,86 @@
       const mod = block.modules[modIndex];
       const isWatched = currentUser.watchedVideos.includes(mod.id) || currentUser.role === "admin";
       const videoSrc = getVideoSourceForModule(mod.id);
+      const savedSec = Math.floor(currentUser.videoProgress?.[mod.id] || 0);
+
+      const mobileLabel = document.getElementById("mobileCurrentModuleLabel");
+      if (mobileLabel) mobileLabel.textContent = mod.title;
 
       state.zoomContext = { concepts: mod.concepts, index: 0 };
 
       main.innerHTML = `
-        <div class="max-w-5xl mx-auto space-y-6 pb-12">
+        <div class="max-w-5xl mx-auto space-y-5 sm:space-y-6 pb-12">
 
           <!-- ENCABEZADO DEL MÓDULO -->
-          <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-blue-800/40">
+          <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white p-4 sm:p-6 rounded-2xl shadow-lg border border-blue-800/40">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold uppercase tracking-wider bg-blue-600 px-3 py-1 rounded-full">${block.code}: ${block.title}</span>
-                <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-blue-600 px-2.5 sm:px-3 py-1 rounded-full">${block.code}: ${block.title}</span>
+                <span class="text-[11px] sm:text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full flex items-center gap-1">
                   <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${mod.duration}
                 </span>
-                ${modIndex === 0 ? `<span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2.5 py-1 rounded-full">Inicio de Bloque</span>` : ''}
-                ${modIndex === block.modules.length - 1 ? `<span class="text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-full">Cierre de Bloque</span>` : ''}
               </div>
 
               <!-- Indicador de estado del video obligatorio -->
-              <div id="videoStatusBadge" class="text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 ${
+              <div id="videoStatusBadge" class="text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 ${
                 isWatched
                   ? 'bg-emerald-500 text-slate-950'
                   : 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
               }">
-                <i data-lucide="${isWatched ? 'check-circle-2' : 'play-circle'}" class="w-4 h-4"></i>
-                <span>${isWatched ? 'Video Visto Completo (Puedes repetirlo libremente)' : 'Requisito: Ver el video completo para avanzar'}</span>
+                <i data-lucide="${isWatched ? 'check-circle-2' : 'play-circle'}" class="w-4 h-4 shrink-0"></i>
+                <span>${isWatched ? 'Video Completado ✓' : 'Requisito: Ver video completo'}</span>
               </div>
             </div>
 
-            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">${mod.title}</h2>
-            <p class="text-xs text-blue-200 mt-2 italic">"${mod.prevNext.intro}"</p>
+            <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">${mod.title}</h2>
+            <p class="text-xs text-blue-200 mt-1.5 italic">"${mod.prevNext.intro}"</p>
 
-            <div class="grid md:grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-800/90 text-sm">
+            <div class="grid md:grid-cols-2 gap-3 sm:gap-4 mt-4 sm:mt-5 pt-4 border-t border-slate-800/90 text-sm">
               <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
                 <div class="text-xs font-bold uppercase text-blue-400 mb-1">🎯 Objetivo de Aprendizaje</div>
-                <p class="text-slate-200 leading-relaxed text-xs md:text-sm">${mod.objective}</p>
+                <p class="text-slate-200 leading-relaxed text-xs sm:text-sm">${mod.objective}</p>
               </div>
               <div class="bg-slate-900/70 p-3.5 rounded-xl border border-slate-800">
                 <div class="text-xs font-bold uppercase text-amber-400 mb-1">💼 Aplicación en tu Rol</div>
-                <p class="text-slate-200 leading-relaxed text-xs md:text-sm">${mod.whyItMatters}</p>
+                <p class="text-slate-200 leading-relaxed text-xs sm:text-sm">${mod.whyItMatters}</p>
               </div>
             </div>
           </div>
 
-          <!-- REPRODUCTOR DE VIDEO CON CONTROL DE VISUALIZACIÓN COMPLETA -->
+          <!-- REPRODUCTOR DE VIDEO CON CONTROL DE VISUALIZACIÓN Y RETOMA AUTOMÁTICA -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+            <div class="p-3.5 sm:p-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2">
-                <i data-lucide="video" class="w-5 h-5 text-blue-400"></i>
+                <i data-lucide="video" class="w-5 h-5 text-blue-400 shrink-0"></i>
                 <div>
-                  <h3 class="font-bold text-sm">Cápsula Audiovisual Obligatoria · ${mod.title}</h3>
+                  <h3 class="font-bold text-xs sm:text-sm">Cápsula Audiovisual · ${mod.title}</h3>
                   <p class="text-[11px] text-slate-400">
-                    ${isWatched ? 'Ya completaste este video. Puedes volver a verlo o adelantar libremente.' : 'Debes ver el video completo hasta el final para desbloquear el siguiente módulo.'}
+                    ${
+                      isWatched
+                        ? 'Ya completaste este video. Puedes volver a verlo libremente las veces que quieras.'
+                        : savedSec > 5
+                          ? `Retomando automáticamente desde donde quedaste (${Math.floor(savedSec / 60)}:${String(savedSec % 60).padStart(2, '0')}).`
+                          : 'Mira el video hasta el final para habilitar el avance al siguiente módulo.'
+                    }
                   </p>
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                <button onclick="openZoomModal(0)" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
-                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
-                  Conceptos en Modo Zoom
-                </button>
-              </div>
+              <button onclick="openZoomModal(0)" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                <span>Conceptos en Zoom</span>
+              </button>
             </div>
 
             <div class="bg-slate-950 aspect-video relative flex items-center justify-center">
               <video
                 id="moduleVideoPlayer"
                 src="${videoSrc}"
+                playsinline
+                webkit-playsinline
                 controls
                 controlsList="nodownload"
-                class="w-full h-full max-h-[460px] object-contain"
+                class="w-full h-full max-h-[480px] object-contain"
+                onerror="handleVideoFallback(this, '${mod.id}')"
               >
                 Tu navegador no soporta reproducción de video HTML5.
               </video>
@@ -1899,31 +1998,31 @@
           </div>
 
           <!-- CONCEPTOS CLAVE DEL MÓDULO -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
               <div>
-                <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                  <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+                <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="layers" class="w-5 h-5 text-blue-600 shrink-0"></i>
                   Conceptos Clave del Módulo
                 </h3>
-                <p class="text-xs text-slate-500">Haz clic sobre cualquier concepto para ampliarlo en pantalla completa.</p>
+                <p class="text-xs text-slate-500">Toca cualquier tarjeta para ampliarla en pantalla completa.</p>
               </div>
-              <button onclick="openZoomModal(0)" class="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5">
-                <i data-lucide="zoom-in" class="w-4 h-4"></i> Ver en Modo Lupa (${mod.concepts.length})
+              <button onclick="openZoomModal(0)" class="text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                <i data-lucide="zoom-in" class="w-4 h-4"></i> Modo Lupa (${mod.concepts.length})
               </button>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-2 gap-3.5 sm:gap-4">
               ${mod.concepts.map((c, idx) => `
                 <div onclick="openZoomModal(${idx})" class="concept-card cursor-pointer rounded-xl border border-slate-200 p-4 bg-slate-50/60 hover:bg-white hover:border-blue-400 flex flex-col justify-between">
                   <div>
                     <div class="flex items-start justify-between gap-2 mb-2">
-                      <span class="font-extrabold text-slate-900 text-base">${c.term}</span>
+                      <span class="font-extrabold text-slate-900 text-sm sm:text-base">${c.term}</span>
                       <span class="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md shrink-0 flex items-center gap-1">
-                        <i data-lucide="zoom-in" class="w-3 h-3"></i> Ampliar
+                        <i data-lucide="zoom-in" class="w-3 h-3"></i> Zoom
                       </span>
                     </div>
-                    <p class="text-xs md:text-sm text-slate-700 leading-relaxed mb-3">${c.def}</p>
+                    <p class="text-xs sm:text-sm text-slate-700 leading-relaxed mb-3">${c.def}</p>
                   </div>
                   <div class="bg-amber-50/90 border border-amber-200/80 rounded-lg p-3 text-xs text-amber-950">
                     <strong class="font-bold text-amber-800 block mb-0.5">💡 Analogía / Ejemplo:</strong>
@@ -1935,42 +2034,42 @@
           </div>
 
           <!-- CASO INTEGRADOR Y ACTIVIDAD PRÁCTICA -->
-          <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-blue-950 text-white rounded-2xl p-6 shadow-sm border border-blue-900">
+          <div class="grid md:grid-cols-2 gap-4 sm:gap-6">
+            <div class="bg-blue-950 text-white rounded-2xl p-5 sm:p-6 shadow-sm border border-blue-900">
               <div class="text-xs font-bold uppercase tracking-wider text-blue-300 mb-2 flex items-center gap-1.5">
                 <i data-lucide="briefcase" class="w-4 h-4"></i> Caso Integrador Real
               </div>
-              <p class="text-sm leading-relaxed text-blue-50">${mod.integratorExample}</p>
+              <p class="text-xs sm:text-sm leading-relaxed text-blue-50">${mod.integratorExample}</p>
             </div>
 
-            <div class="bg-emerald-950 text-white rounded-2xl p-6 shadow-sm border border-emerald-900">
+            <div class="bg-emerald-950 text-white rounded-2xl p-5 sm:p-6 shadow-sm border border-emerald-900">
               <div class="text-xs font-bold uppercase tracking-wider text-emerald-300 mb-2 flex items-center gap-1.5">
                 <i data-lucide="check-square" class="w-4 h-4"></i> Actividad Práctica (5 Minutos)
               </div>
-              <p class="text-sm leading-relaxed text-emerald-50">${mod.activity}</p>
+              <p class="text-xs sm:text-sm leading-relaxed text-emerald-50">${mod.activity}</p>
             </div>
           </div>
 
           <!-- APUNTES PERSONALES DEL PARTICIPANTE -->
-          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
             <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2 mb-1">
               <i data-lucide="pen-tool" class="w-4 h-4 text-emerald-600"></i>
               Tu Glosario Personal · ${mod.id}
             </h4>
-            <p class="text-xs text-slate-500 mb-3">Anota con tus propias palabras las definiciones clave de este módulo: <strong>${mod.concepts.map(c => c.term).join(" · ")}</strong></p>
+            <p class="text-xs text-slate-500 mb-3">Términos de hoy: <strong>${mod.concepts.map(c => c.term).join(" · ")}</strong></p>
             <textarea
               rows="2"
               oninput="savePersonalNote('${mod.id}', this.value)"
-              placeholder="Escribe tus apuntes personales de este módulo (se guardan en tu cuenta)..."
-              class="w-full p-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Escribe aquí tus apuntes de este módulo (se sincronizan automáticamente en tu cuenta)..."
+              class="w-full p-3 rounded-xl border border-slate-300 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >${currentUser.personalNotes?.[mod.id] || ""}</textarea>
           </div>
 
           <!-- CONTINUAR AL SIGUIENTE MÓDULO O EVALUACIÓN -->
-          <div class="bg-slate-900 text-white rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div class="space-y-1">
               <div class="text-xs font-bold uppercase tracking-wider text-amber-400">Próximo Paso</div>
-              <p class="text-sm text-slate-200">${mod.prevNext.outro}</p>
+              <p class="text-xs sm:text-sm text-slate-200">${mod.prevNext.outro}</p>
             </div>
             <div id="nextStepActionContainer" class="flex items-center gap-3 shrink-0">
               ${renderNextStepButtonHTML(block, modIndex, isWatched)}
@@ -1984,48 +2083,74 @@
       lucide.createIcons();
     }
 
+    // Si el video no está aún en el bucket de Supabase, intenta cargarlo automáticamente de la carpeta local videos/
+    function handleVideoFallback(videoEl, moduleId) {
+      const localPath = `videos/${moduleId}.mp4`;
+      if (!videoEl.dataset.triedLocal) {
+        videoEl.dataset.triedLocal = "true";
+        videoEl.src = localPath;
+      }
+    }
+
     function renderNextStepButtonHTML(block, modIndex, isWatched) {
       if (modIndex < block.modules.length - 1) {
         const nextModId = block.modules[modIndex + 1].id;
         if (isWatched) {
           return `
-            <button onclick="selectModule(${block.id}, '${nextModId}')" class="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm flex items-center gap-2 shadow-lg transition">
+            <button onclick="selectModule(${block.id}, '${nextModId}')" class="w-full md:w-auto justify-center px-5 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition">
               Continuar a ${nextModId} <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </button>
           `;
         } else {
           return `
-            <button disabled class="px-5 py-3 rounded-xl bg-slate-800 text-slate-400 font-bold text-sm flex items-center gap-2 border border-slate-700 cursor-not-allowed">
-              <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i> Termina el video para ir a ${nextModId}
+            <button disabled class="w-full md:w-auto justify-center px-5 py-3.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-700 cursor-not-allowed">
+              <i data-lucide="lock" class="w-4 h-4 text-amber-400 shrink-0"></i> Completa el video para ir a ${nextModId}
             </button>
           `;
         }
       } else {
         if (isWatched) {
           return `
-            <button onclick="startBlockQuiz(${block.id})" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm flex items-center gap-2 shadow-lg transition">
+            <button onclick="startBlockQuiz(${block.id})" class="w-full md:w-auto justify-center px-5 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition">
               Rendir Evaluación del ${block.code} <i data-lucide="award" class="w-4 h-4"></i>
             </button>
           `;
         } else {
           return `
-            <button disabled class="px-5 py-3 rounded-xl bg-slate-800 text-slate-400 font-bold text-sm flex items-center gap-2 border border-slate-700 cursor-not-allowed">
-              <i data-lucide="lock" class="w-4 h-4 text-amber-400"></i> Termina el video para rendir la Evaluación
+            <button disabled class="w-full md:w-auto justify-center px-5 py-3.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs sm:text-sm flex items-center gap-2 border border-slate-700 cursor-not-allowed">
+              <i data-lucide="lock" class="w-4 h-4 text-amber-400 shrink-0"></i> Completa el video para rendir Evaluación
             </button>
           `;
         }
       }
     }
 
+    // Control de reproducción con guardado de segundo actual cada 5 segundos
     function setupVideoEnforcement(moduleId) {
       const video = document.getElementById("moduleVideoPlayer");
       if (!video) return;
 
-      state.videoMaxTimeWatched = 0;
+      const savedTime = currentUser.videoProgress?.[moduleId] || 0;
+      state.videoMaxTimeWatched = savedTime;
+      let lastSavedTimestamp = 0;
+
+      video.addEventListener("loadedmetadata", () => {
+        if (savedTime > 2 && savedTime < video.duration - 2) {
+          video.currentTime = savedTime;
+        }
+      });
 
       video.addEventListener("timeupdate", () => {
         if (!video.seeking && video.currentTime > state.videoMaxTimeWatched) {
           state.videoMaxTimeWatched = video.currentTime;
+        }
+        // Guardar el segundo donde va cada 5 segundos para que si cierra la página no pierda su lugar
+        const now = Date.now();
+        if (now - lastSavedTimestamp > 5000 && !currentUser.watchedVideos.includes(moduleId)) {
+          lastSavedTimestamp = now;
+          if (!currentUser.videoProgress) currentUser.videoProgress = {};
+          currentUser.videoProgress[moduleId] = state.videoMaxTimeWatched;
+          saveUserToDB(currentUser);
         }
       });
 
@@ -2051,8 +2176,8 @@
           }
           const badge = document.getElementById("videoStatusBadge");
           if (badge) {
-            badge.className = "text-xs font-bold px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-500 text-slate-950";
-            badge.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> <span>¡Video Completado! Siguiente módulo desbloqueado</span>`;
+            badge.className = "text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-500 text-slate-950";
+            badge.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 shrink-0"></i> <span>¡Video Completado! Siguiente módulo habilitado</span>`;
           }
           lucide.createIcons();
         }
@@ -2060,7 +2185,7 @@
     }
 
     // ============================================================================
-    // EVALUACIONES DE BLOQUE CON REGISTRO DE INTENTOS Y NOTA MÁXIMA
+    // EVALUACIONES DE BLOQUE
     // ============================================================================
     function shuffleArray(arr) {
       const copy = [...arr];
@@ -2076,6 +2201,7 @@
         alert("Debes completar los videos de todos los módulos de este bloque antes de rendir la evaluación.");
         return;
       }
+      closeMobileSidebar();
 
       const bank = BLOCK_QUESTION_BANKS[blockId];
       const picked10 = shuffleArray(bank).slice(0, 10).map(q => ({
@@ -2155,23 +2281,22 @@
       const userStat = currentUser.blockTestStats?.[block.id];
 
       main.innerHTML = `
-        <div class="max-w-4xl mx-auto space-y-6 pb-12">
-          <!-- ENCABEZADO EJECUTIVO DE LA EVALUACIÓN -->
-          <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        <div class="max-w-4xl mx-auto space-y-5 sm:space-y-6 pb-12">
+          <div class="bg-slate-900 text-white p-5 sm:p-6 rounded-2xl shadow-lg border border-slate-800 flex flex-wrap items-center justify-between gap-4">
             <div>
               <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full mb-2">
                 <i data-lucide="award" class="w-3.5 h-3.5"></i> Evaluación de Cierre · 10 Preguntas
               </div>
-              <h2 class="text-2xl font-extrabold">Evaluación · ${block.code}: ${block.title}</h2>
-              <p class="text-xs md:text-sm text-slate-300 mt-1">
+              <h2 class="text-xl sm:text-2xl font-extrabold">Evaluación · ${block.code}: ${block.title}</h2>
+              <p class="text-xs sm:text-sm text-slate-300 mt-1">
                 Para aprobar este bloque y desbloquear el siguiente necesitas obtener un <strong class="text-emerald-400">mínimo de 80% (8 de 10 respuestas correctas)</strong>.
               </p>
             </div>
             ${
               userStat
                 ? `<div class="bg-slate-800 px-4 py-2.5 rounded-xl border border-slate-700 text-xs">
-                    <div class="text-slate-400">Tus intentos en este bloque: <strong class="text-white">${userStat.attempts}</strong></div>
-                    <div class="text-slate-400 mt-0.5">Mejor calificación: <strong class="text-emerald-400">${userStat.bestScore * 10}% (${userStat.bestScore}/10)</strong></div>
+                    <div class="text-slate-400">Tus intentos: <strong class="text-white">${userStat.attempts}</strong></div>
+                    <div class="text-slate-400 mt-0.5">Mejor nota: <strong class="text-emerald-400">${userStat.bestScore * 10}% (${userStat.bestScore}/10)</strong></div>
                   </div>`
                 : ''
             }
@@ -2181,28 +2306,28 @@
           ${
             quiz.submitted
               ? `
-                <div class="p-6 rounded-2xl border-2 shadow-md ${
+                <div class="p-5 sm:p-6 rounded-2xl border-2 shadow-md ${
                   passed
                     ? 'bg-emerald-50 border-emerald-500 text-emerald-950'
                     : 'bg-rose-50 border-rose-500 text-rose-950'
                 }">
-                  <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
-                      <div class="w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-extrabold ${
+                      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex flex-col items-center justify-center font-extrabold shrink-0 ${
                         passed ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
                       }">
-                        <span class="text-xl leading-none">${quiz.score * 10}%</span>
+                        <span class="text-lg sm:text-xl leading-none">${quiz.score * 10}%</span>
                         <span class="text-[11px] font-semibold opacity-90 mt-0.5">${quiz.score}/10</span>
                       </div>
                       <div>
-                        <h3 class="text-xl font-extrabold">
+                        <h3 class="text-lg sm:text-xl font-extrabold">
                           ${
                             passed
                               ? `¡Evaluación Aprobada! Obtuviste ${quiz.score} de 10 (${quiz.score * 10}%)`
                               : `Puntaje obtenido: ${quiz.score} de 10 (${quiz.score * 10}%) · Se requiere 80% (8/10)`
                           }
                         </h3>
-                        <p class="text-sm mt-1">
+                        <p class="text-xs sm:text-sm mt-1">
                           ${
                             passed
                               ? block.id + 1 < COURSE_BLOCKS.length
@@ -2214,14 +2339,14 @@
                       </div>
                     </div>
 
-                    <div class="flex gap-3 shrink-0">
+                    <div class="flex gap-3 w-full md:w-auto shrink-0">
                       ${
                         !passed
-                          ? `<button onclick="startBlockQuiz(${block.id})" class="px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow">
+                          ? `<button onclick="startBlockQuiz(${block.id})" class="w-full md:w-auto justify-center px-5 py-3 rounded-xl font-bold text-xs sm:text-sm bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 shadow">
                               <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Realizar Nuevo Intento
                             </button>`
                           : block.id + 1 < COURSE_BLOCKS.length
-                            ? `<button onclick="selectModule(${block.id + 1}, '${COURSE_BLOCKS[block.id + 1].modules[0].id}')" class="px-5 py-2.5 rounded-xl font-bold text-xs md:text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 shadow">
+                            ? `<button onclick="selectModule(${block.id + 1}, '${COURSE_BLOCKS[block.id + 1].modules[0].id}')" class="w-full md:w-auto justify-center px-5 py-3 rounded-xl font-bold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 shadow">
                                 Avanzar al ${COURSE_BLOCKS[block.id + 1].code} <i data-lucide="arrow-right" class="w-4 h-4"></i>
                               </button>`
                             : ''
@@ -2246,9 +2371,9 @@
                       ? 'border-emerald-400'
                       : 'border-rose-400'
                     : 'border-slate-200'
-                } p-6">
+                } p-4 sm:p-6">
                   <div class="flex items-center justify-between gap-2 mb-2">
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
+                    <span class="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">
                       Pregunta ${qIdx + 1} de 10 · ${q.moduleRef}
                     </span>
                     ${
@@ -2260,7 +2385,7 @@
                     }
                   </div>
 
-                  <h4 class="font-bold text-slate-900 text-base mb-4 leading-snug">${q.question}</h4>
+                  <h4 class="font-bold text-slate-900 text-sm sm:text-base mb-4 leading-snug">${q.question}</h4>
 
                   <div class="space-y-2.5">
                     ${q.shuffledOptions.map((opt, oIdx) => {
@@ -2280,7 +2405,7 @@
                       return `
                         <button
                           onclick="selectQuizOption(${qIdx}, ${JSON.stringify(opt).replace(/"/g, '&quot;')})"
-                          class="w-full text-left p-3.5 rounded-xl border text-xs md:text-sm transition flex items-start gap-3 ${optionStyle}"
+                          class="w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm transition flex items-start gap-3 ${optionStyle}"
                         >
                           <span class="w-6 h-6 rounded-full border border-current flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                             ${String.fromCharCode(65 + oIdx)}
@@ -2306,11 +2431,11 @@
           <!-- ENVIAR EVALUACIÓN -->
           ${
             !quiz.submitted
-              ? `<div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                  <span class="text-xs md:text-sm text-slate-600 font-medium">
+              ? `<div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                  <span class="text-xs sm:text-sm text-slate-600 font-medium text-center sm:text-left">
                     Progreso: <strong>${Object.keys(quiz.answers).length} de 10 respondidas</strong>
                   </span>
-                  <button onclick="submitBlockQuiz()" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-lg transition flex items-center gap-2">
+                  <button onclick="submitBlockQuiz()" class="px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4"></i> Enviar Evaluación
                   </button>
                 </div>`
@@ -2363,8 +2488,9 @@
       await saveUserToDB(currentUser);
     }
 
-    function openAdminConfigModal() {
+    async function openAdminConfigModal() {
       if (currentUser?.role !== "admin") return;
+      await syncAllUsersFromCloud();
       const container = document.getElementById("videoLinksContainer");
       let html = "";
       COURSE_BLOCKS.forEach(b => {
@@ -2377,8 +2503,8 @@
                 type="text"
                 data-mod-video="${m.id}"
                 value="${val}"
-                placeholder="videos/${m.id}.mp4 (o pega URL de Drive / Servidor)"
-                class="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Automático: Bucket Supabase 'videos/${m.id}.mp4' (o pega URL personalizada)"
+                class="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           `;
@@ -2398,9 +2524,18 @@
     }
 
     async function saveAdminConfig() {
+      const btn = document.getElementById("btnSaveVideoConfig");
+      btn.textContent = "Guardando en Supabase...";
+      btn.disabled = true;
+
       document.querySelectorAll("[data-mod-video]").forEach(input => {
         const modId = input.getAttribute("data-mod-video");
-        state.customVideos[modId] = input.value.trim();
+        const val = input.value.trim();
+        if (val !== "") {
+          state.customVideos[modId] = val;
+        } else {
+          delete state.customVideos[modId];
+        }
       });
       localStorage.setItem("re_customVideos", JSON.stringify(state.customVideos));
 
@@ -2414,6 +2549,8 @@
         } catch (e) {}
       }
 
+      btn.textContent = "Guardar en Supabase";
+      btn.disabled = false;
       closeAdminConfigModal();
       renderAdminDashboardTab();
     }
@@ -2425,6 +2562,11 @@
       const pct = Math.round((watchedCount / totalMods) * 100);
       document.getElementById("globalProgressText").textContent = `${pct}%`;
       document.getElementById("globalProgressBar").style.width = `${pct}%`;
+
+      const mobText = document.getElementById("mobileProgressText");
+      const mobBar = document.getElementById("mobileProgressBar");
+      if (mobText) mobText.textContent = `${pct}%`;
+      if (mobBar) mobBar.style.width = `${pct}%`;
     }
 
     // Inicialización al abrir la plataforma
@@ -2432,7 +2574,6 @@
       initSupabase();
       await syncAllUsersFromCloud();
 
-      // Asegurar que la cuenta maestra de admin exista también en Supabase
       const db = getUsersDB();
       await saveUserToDB(db[DEFAULT_ADMIN_ACCOUNT.email]);
 

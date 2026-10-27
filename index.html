@@ -1099,6 +1099,13 @@
       if (!localUser) return cloudUser;
       if (!cloudUser) return localUser;
 
+      const newerIsCloud = (cloudUser.updatedAtMs || 0) >= (localUser.updatedAtMs || 0);
+
+      // Los datos primitivos (rol, nombre, lastLogin) respetan al que sea más nuevo
+      const baseMerged = newerIsCloud 
+        ? { ...localUser, ...cloudUser } 
+        : { ...cloudUser, ...localUser };
+
       const watchedSet = new Set([
         ...(localUser.watchedVideos || []),
         ...(cloudUser.watchedVideos || [])
@@ -1116,12 +1123,14 @@
         if (!lStat) {
           mergedStats[bId] = cStat;
         } else {
+          const cloudStatNewer = (cStat.updatedAtMs || 0) >= (lStat.updatedAtMs || 0);
           mergedStats[bId] = {
             attempts: Math.max(lStat.attempts || 0, cStat.attempts || 0),
             bestScore: Math.max(lStat.bestScore || 0, cStat.bestScore || 0),
-            lastScore: (cStat.updatedAtMs || 0) >= (lStat.updatedAtMs || 0) ? cStat.lastScore : lStat.lastScore,
+            lastScore: cloudStatNewer ? cStat.lastScore : lStat.lastScore,
             passed: Boolean(lStat.passed || cStat.passed),
-            lastDate: cStat.lastDate || lStat.lastDate
+            lastDate: cloudStatNewer ? cStat.lastDate : lStat.lastDate,
+            updatedAtMs: Math.max(lStat.updatedAtMs || 0, cStat.updatedAtMs || 0)
           };
         }
       });
@@ -1131,16 +1140,13 @@
         mergedProgress[mId] = Math.max(mergedProgress[mId] || 0, sec || 0);
       });
 
-      const mergedNotes = {
-        ...(localUser.personalNotes || {}),
-        ...(cloudUser.personalNotes || {})
-      };
-
-      const newerIsCloud = (cloudUser.updatedAtMs || 0) >= (localUser.updatedAtMs || 0);
+      // Las notas ahora respetan qué dispositivo guardó de último
+      const mergedNotes = newerIsCloud
+        ? { ...(localUser.personalNotes || {}), ...(cloudUser.personalNotes || {}) }
+        : { ...(cloudUser.personalNotes || {}), ...(localUser.personalNotes || {}) };
 
       return {
-        ...localUser,
-        ...cloudUser,
+        ...baseMerged,
         watchedVideos: Array.from(watchedSet),
         unlockedBlocks: Array.from(unlockedSet).sort((a, b) => a - b),
         blockTestStats: mergedStats,
@@ -1152,7 +1158,6 @@
         updatedAtMs: Math.max(localUser.updatedAtMs || 0, cloudUser.updatedAtMs || 0)
       };
     }
-
     function updateCloudBadgesUI(ok, detailMsg) {
       cloudSyncHealthy = ok;
       lastCloudErrorMsg = detailMsg || "";
@@ -1263,7 +1268,6 @@
           });
           localStorage.setItem("re_users_db", JSON.stringify(db));
 
-          // Si hay un usuario logueado en este dispositivo, actualizar su estado en pantalla
           if (currentUser) {
             const k = currentUser.email.toLowerCase();
             if (db[k]) {
@@ -1271,13 +1275,38 @@
               const prevUnlockedLen = currentUser.unlockedBlocks?.length || 0;
               currentUser = db[k];
               updateGlobalProgressUI();
+
+              // Aseguramos que el reproductor local reconozca el avance que llegó desde el teléfono sin trabar el seek
+              if (state.currentView.type === "module") {
+                 const mId = state.currentView.moduleId;
+                 if (currentUser.videoProgress && currentUser.videoProgress[mId] > state.videoMaxTimeWatched) {
+                    state.videoMaxTimeWatched = currentUser.videoProgress[mId];
+                 }
+              }
+
               if (
                 state.activeTab === "course" &&
                 ((currentUser.watchedVideos?.length || 0) !== prevWatchedLen ||
                   (currentUser.unlockedBlocks?.length || 0) !== prevUnlockedLen)
               ) {
                 renderSidebar();
-                if (state.currentView.type === "module") renderMainContent();
+                
+                // Actualizamos SOLO los botones del DOM, SIN disparar renderMainContent() para no cortar el video actual
+                if (state.currentView.type === "module") {
+                   const block = COURSE_BLOCKS.find(b => b.id === state.currentView.blockId);
+                   const modIndex = block.modules.findIndex(m => m.id === state.currentView.moduleId);
+                   const isWatched = currentUser.watchedVideos.includes(state.currentView.moduleId) || currentUser.role === "admin";
+                   
+                   const nextContainer = document.getElementById("nextStepActionContainer");
+                   if (nextContainer) nextContainer.innerHTML = renderNextStepButtonHTML(block, modIndex, isWatched);
+                   
+                   const badge = document.getElementById("videoStatusBadge");
+                   if (badge && isWatched) {
+                     badge.className = "text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-emerald-500 text-slate-950";
+                     badge.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 shrink-0"></i> <span>Video Completado ✓</span>`;
+                   }
+                   lucide.createIcons();
+                }
               }
             }
           }
@@ -1286,7 +1315,7 @@
         updateCloudBadgesUI(false, e.message);
       }
     }
-
+    
     async function forceManualSync() {
       const icon = document.getElementById("syncSpinnerIcon");
       if (icon) icon.classList.add("animate-spin");

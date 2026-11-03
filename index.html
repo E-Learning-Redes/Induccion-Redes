@@ -2460,7 +2460,7 @@
                     <h3 class="text-lg sm:text-xl font-extrabold">${passed ? `Evaluación aprobada con ${quiz.score} de 10` : `Obtuviste ${quiz.score} de 10. Se requiere ${PASS_SCORE}/10`}</h3>
                     <p class="text-xs sm:text-sm mt-1">${passed
                       ? (nextBlock ? `Desbloqueaste el <strong>${nextBlock.code}: ${nextBlock.title}</strong>.` : `Completaste todos los bloques del programa. Tu certificado ya está disponible.`)
-                      : `Abajo se indican las preguntas con error y el concepto a repasar. Podrás volver a rendir en ${RETRY_COOLDOWN_MIN} minutos con un set distinto de preguntas.`}</p>
+                      : `Abajo tienes la respuesta correcta y la explicación de cada pregunta. Podrás volver a rendir en ${RETRY_COOLDOWN_MIN} minutos con un set distinto de preguntas.`}</p>
                   </div>
                 </div>
                 <div class="flex gap-3 w-full md:w-auto shrink-0">
@@ -2490,10 +2490,9 @@
                       let style = "border-slate-200 hover:border-blue-400 bg-slate-50/70 text-slate-800";
                       if (!quiz.submitted && isSelected) style = "border-blue-600 bg-blue-50 text-blue-950 font-semibold ring-2 ring-blue-500/20";
                       else if (quiz.submitted) {
-                        // Si aprobó, se muestra la pauta completa. Si reprobó, solo se marca su error (sin revelar la correcta).
-                        if (passed && opt === q.correct) style = "border-emerald-500 bg-emerald-50 text-emerald-950 font-bold";
+                        // Tras enviar, siempre se marca la correcta en verde y la elegida incorrecta en rojo
+                        if (opt === q.correct) style = "border-emerald-500 bg-emerald-50 text-emerald-950 font-bold";
                         else if (isSelected && !isCorrect) style = "border-rose-500 bg-rose-50 text-rose-900 line-through";
-                        else if (isSelected && isCorrect) style = "border-emerald-500 bg-emerald-50 text-emerald-950 font-bold";
                       }
                       const safe = opt.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;");
                       return `<button data-opt="${opt.replace(/"/g, "&quot;")}" onclick="selectQuizOption(${qIdx}, '${safe}')" ${quiz.submitted ? 'disabled' : ''} class="w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm transition flex items-start gap-3 ${style}">
@@ -2503,9 +2502,11 @@
                     }).join("")}
                   </div>
                   ${quiz.submitted
-                    ? (passed
-                        ? `<div class="mt-4 p-3.5 rounded-xl bg-slate-100 text-xs text-slate-700 border border-slate-200"><strong class="text-slate-900">Retroalimentación:</strong> ${q.explanation}</div>`
-                        : (!isCorrect ? `<div class="mt-4 p-3.5 rounded-xl bg-amber-50 text-xs text-amber-900 border border-amber-200"><strong>Para repasar:</strong> revisa el concepto "${q.term}" en el módulo ${q.moduleRef} antes del siguiente intento.</div>` : ''))
+                    ? `<div class="mt-4 p-3.5 rounded-xl ${isCorrect ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-rose-50 border-rose-200 text-rose-950'} text-xs border space-y-1">
+                        <div><strong>Respuesta correcta:</strong> ${q.correct}</div>
+                        <div><strong>Por qué:</strong> ${q.explanation}</div>
+                        <div class="text-[11px] opacity-80">Concepto: ${q.term} · ${q.moduleRef}</div>
+                      </div>`
                     : ''}
                 </div>`;
             }).join("")}
